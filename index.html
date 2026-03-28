@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CentralView ERP Install Hub</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1f5f9;color:#1a1a1a;min-height:100vh;font-size:16px}
+.header{background:linear-gradient(135deg,#1e1b4b 0%,#4338ca 60%,#6366f1 100%);padding:48px 24px 64px;text-align:center}
+.header h1{color:white;font-size:2rem;font-weight:800;margin-bottom:10px;letter-spacing:-0.5px}
+.header p{color:#c7d2fe;font-size:1rem}
+.header-sub{color:#a5b4fc;font-size:0.85rem;margin-top:8px}
+.main{max-width:1100px;margin:-32px auto 0;padding:0 16px 48px}
+.token-bar{background:white;border:1px solid #e5e7eb;border-radius:14px;padding:20px 24px;margin-bottom:28px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.token-bar label{font-size:15px;font-weight:600;display:block;margin-bottom:8px;color:#374151}
+.token-row{display:flex;gap:10px;flex-wrap:wrap}
+.token-row input{flex:1;min-width:220px;padding:11px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:monospace;outline:none}
+.token-hint{font-size:13px;color:#9ca3af;margin-top:6px}
+.btn-primary{background:#4338ca;color:white;border:none;border-radius:8px;padding:11px 22px;font-size:15px;font-weight:700;cursor:pointer}
+.btn-primary:hover{background:#3730a3}
+.btn-primary:disabled{background:#a5b4fc;cursor:not-allowed}
+.checklist-card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:20px}
+.checklist-card:hover{box-shadow:0 6px 20px rgba(0,0,0,0.1)}
+.cl-header{padding:22px 24px;background:linear-gradient(135deg,#b45309,#f59e0b);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.cl-header-left{display:flex;align-items:center;gap:14px}
+.cl-header h2{color:white;font-size:1.15rem;font-weight:700}
+.cl-header p{color:rgba(255,255,255,0.85);font-size:0.85rem;margin-top:2px}
+.cl-header-icon{font-size:1.8rem;opacity:0.8}
+.cl-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid #f3f4f6}
+.cs{text-align:center;padding:16px 10px}
+.cs .n{font-size:1.8rem;font-weight:800}
+.cs .l{font-size:0.8rem;font-weight:600;color:#6b7280;margin-top:2px}
+.cl-body{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.cl-list-col{padding:14px 20px;border-right:1px solid #f3f4f6;max-height:160px;overflow-y:auto}
+.cl-list-col:last-child{border-right:none}
+.cl-col-label{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-bottom:8px}
+.cl-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f9fafb;font-size:0.875rem}
+.cl-row:last-child{border-bottom:none}
+.cl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.cl-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#374151;font-weight:500}
+.cl-days{font-size:0.78rem;font-weight:700;white-space:nowrap}
+.cl-footer{padding:14px 20px;border-top:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between}
+.last-updated{font-size:0.8rem;color:#9ca3af}
+.launch-btn-sm{background:#fef3c7;border:1px solid #fde68a;color:#92400e;border-radius:8px;padding:9px 20px;font-size:0.9rem;font-weight:700;text-decoration:none;transition:background 0.1s}
+.launch-btn-sm:hover{background:#fde68a}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);transition:transform 0.15s,box-shadow 0.15s}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.12)}
+.card-header{padding:22px 20px 16px;position:relative}
+.card-header h2{color:white;font-size:1.1rem;font-weight:700;margin-bottom:4px}
+.card-header p{color:rgba(255,255,255,0.8);font-size:0.82rem}
+.card-icon{position:absolute;top:18px;right:18px;font-size:1.8rem;opacity:0.7}
+.card-stats{padding:16px 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border-bottom:1px solid #f3f4f6}
+.card-body{padding:16px 20px 20px}
+.card-mini-stats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;min-height:28px}
+.mini-badge{font-size:0.78rem;font-weight:600;padding:3px 10px;border-radius:999px;border-width:1px;border-style:solid}
+.launch-btn{display:block;width:100%;text-align:center;padding:11px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;font-size:0.95rem;font-weight:700;color:#374151;text-decoration:none;transition:background 0.1s}
+.launch-btn:hover{background:#f1f5f9}
+.loading-card{font-size:0.875rem;color:#9ca3af}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid #e5e7eb;border-top-color:#6366f1;border-radius:50%;animation:spin .7s linear infinite;margin-right:5px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-small{color:#dc2626;font-size:0.875rem}
+.card-last-updated{font-size:0.78rem;color:#9ca3af;text-align:center;margin-top:8px}
+@media(max-width:760px){.cards{grid-template-columns:1fr}.cl-body{grid-template-columns:1fr}.cl-stats-row{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>&#x1F4CB; CentralView ERP Install Hub</h1>
+  <p>Live install dashboards for all products — powered by Asana</p>
+  <p class="header-sub">Enter your token once below to load live stats across all projects</p>
+</div>
+<div class="main">
+  <div class="token-bar">
+    <label>Asana Personal Access Token</label>
+    <div class="token-row">
+      <input type="password" id="token-input" placeholder="Paste your Asana Personal Access Token here..." onkeydown="if(event.key==='Enter')loadAll()"/>
+      <button class="btn-primary" id="btn-load" onclick="loadAll()">&#x25B6; Load All Projects</button>
+    </div>
+    <p class="token-hint">Token stored in your browser session and shared with all dashboards — no need to re-enter on individual pages.</p>
+  </div>
+
+  <div class="checklist-card">
+    <div class="cl-header">
+      <div class="cl-header-left">
+        <span class="cl-header-icon">&#x2705;</span>
+        <div><h2>Installation Checklists</h2><p id="sub-cl">Checklist completion tracker</p></div>
+      </div>
+      <a class="launch-btn-sm" id="cl-launch-btn" href="checklists_tracker.html">Launch Checklists &#8594;</a>
+    </div>
+    <div class="cl-stats-row">
+      <div class="cs"><div class="n" style="color:#ef4444" id="cl-over">-</div><div class="l">Danger (&le;7 days)</div></div>
+      <div class="cs"><div class="n" style="color:#f59e0b" id="cl-warn">-</div><div class="l">At Risk (&le;14 days)</div></div>
+      <div class="cs"><div class="n" style="color:#3b82f6" id="cl-ok">-</div><div class="l">On Track</div></div>
+      <div class="cs"><div class="n" style="color:#10b981" id="cl-complete">-</div><div class="l">Complete</div></div>
+    </div>
+    <div class="cl-body">
+      <div class="cl-list-col">
+        <div class="cl-col-label">&#x1F534; Danger (&le;7d)</div>
+        <div id="cl-overdue-list"><span class="loading-card">Load token to view</span></div>
+      </div>
+      <div class="cl-list-col">
+        <div class="cl-col-label">&#x26A0;&#xFE0F; At Risk (&le;14 days)</div>
+        <div id="cl-atrisk-list"><span class="loading-card">Load token to view</span></div>
+      </div>
+    </div>
+    <div class="cl-footer">
+      <span class="last-updated" id="ts-cl"></span>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-header" style="background:linear-gradient(135deg,#0f766e,#14b8a6)">
+        <span class="card-icon">&#x1F511;</span>
+        <h2>SSO Installs</h2><p id="sub-sso">Single Sign-On deployment</p>
+      </div>
+      <div class="card-stats">
+        <div class="cs"><div class="n" style="color:#10b981" id="sso-live">-</div><div class="l">Live</div></div>
+        <div class="cs"><div class="n" style="color:#3b82f6" id="sso-sched">-</div><div class="l">Scheduled</div></div>
+        <div class="cs"><div class="n" style="color:#6b7280" id="sso-other">-</div><div class="l">Not Live/Sched</div></div>
+      </div>
+      <div class="card-body">
+        <div class="card-mini-stats" id="mini-sso"><span class="loading-card">Load token to view stats</span></div>
+        <a class="launch-btn" id="sso-launch-btn" href="sso_tracker.html">Launch SSO Dashboard &#8594;</a>
+        <div class="card-last-updated" id="ts-sso"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" style="background:linear-gradient(135deg,#4338ca,#6366f1)">
+        <span class="card-icon">&#x1F4E6;</span>
+        <h2>CIS Installs</h2><p id="sub-cis">Core install pipeline</p>
+      </div>
+      <div class="card-stats">
+        <div class="cs"><div class="n" style="color:#10b981" id="cis-live">-</div><div class="l">Live</div></div>
+        <div class="cs"><div class="n" style="color:#3b82f6" id="cis-sched">-</div><div class="l">Scheduled</div></div>
+        <div class="cs"><div class="n" style="color:#6b7280" id="cis-other">-</div><div class="l">Not Live/Sched</div></div>
+      </div>
+      <div class="card-body">
+        <div class="card-mini-stats" id="mini-cis"><span class="loading-card">Load token to view stats</span></div>
+        <a class="launch-btn" id="cis-launch-btn" href="cis_tracker.html">Launch CIS Dashboard &#8594;</a>
+        <div class="card-last-updated" id="ts-cis"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" style="background:linear-gradient(135deg,#059669,#10b981)">
+        <span class="card-icon">&#x1F527;</span>
+        <h2>Works Installs</h2><p id="sub-wk">Works deployment</p>
+      </div>
+      <div class="card-stats">
+        <div class="cs"><div class="n" style="color:#10b981" id="wk-live">-</div><div class="l">Live</div></div>
+        <div class="cs"><div class="n" style="color:#3b82f6" id="wk-sched">-</div><div class="l">Scheduled</div></div>
+        <div class="cs"><div class="n" style="color:#6b7280" id="wk-other">-</div><div class="l">Not Live/Sched</div></div>
+      </div>
+      <div class="card-body">
+        <div class="card-mini-stats" id="mini-wk"><span class="loading-card">Load token to view stats</span></div>
+        <a class="launch-btn" id="wk-launch-btn" href="works_tracker.html" target="_blank">Launch Works Dashboard &#8594;</a>
+        <div class="card-last-updated" id="ts-wk"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">
+        <span class="card-icon">&#x1F50D;</span>
+        <h2>Power Search Installs</h2><p id="sub-ps">Power Search deployment</p>
+      </div>
+      <div class="card-stats">
+        <div class="cs"><div class="n" style="color:#10b981" id="ps-live">-</div><div class="l">Live</div></div>
+        <div class="cs"><div class="n" style="color:#3b82f6" id="ps-sched">-</div><div class="l">Scheduled</div></div>
+        <div class="cs"><div class="n" style="color:#6b7280" id="ps-other">-</div><div class="l">Not Live/Sched</div></div>
+      </div>
+      <div class="card-body">
+        <div class="card-mini-stats" id="mini-ps"><span class="loading-card">Load token to view stats</span></div>
+        <a class="launch-btn" id="ps-launch-btn" href="ps_tracker.html" target="_blank">Launch Power Search Dashboard &#8594;</a>
+        <div class="card-last-updated" id="ts-ps"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:20px">
+    <div class="card" style="max-width:100%">
+      <div class="card-header" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
+        <span class="card-icon">&#x1F4B0;</span>
+        <h2>FIN Installs</h2><p id="sub-fin">Financial install pipeline</p>
+      </div>
+      <div class="card-stats">
+        <div class="cs"><div class="n" style="color:#10b981" id="fin-live">-</div><div class="l">Live</div></div>
+        <div class="cs"><div class="n" style="color:#3b82f6" id="fin-sched">-</div><div class="l">Scheduled</div></div>
+        <div class="cs"><div class="n" style="color:#6b7280" id="fin-other">-</div><div class="l">Not Live/Sched</div></div>
+      </div>
+      <div class="card-body">
+        <div class="card-mini-stats" id="mini-fin"><span class="loading-card">Load token to view stats</span></div>
+        <a class="launch-btn" id="fin-launch-btn" href="fin_tracker.html" target="_blank">Launch FIN Dashboard &#8594;</a>
+        <div class="card-last-updated" id="ts-fin"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+var ASANA_BASE="https://app.asana.com/api/1.0",CHECKLIST_GID="1213736136206851";
+var INSTALL_PROJECTS=[
+  {id:"cis",gid:"1211708203704329",subEl:"sub-cis",miniEl:"mini-cis",tsEl:"ts-cis"},
+  {id:"ps", gid:"1211708717690220",subEl:"sub-ps", miniEl:"mini-ps", tsEl:"ts-ps"},
+  {id:"wk", gid:"1211708203705602",subEl:"sub-wk", miniEl:"mini-wk", tsEl:"ts-wk"},
+  {id:"fin",gid:"1211718908829177",subEl:"sub-fin",miniEl:"mini-fin",tsEl:"ts-fin"},
+  {id:"sso",gid:"1211708717686077",subEl:"sub-sso",miniEl:"mini-sso",tsEl:"ts-sso"}
+];
+var STATUS_META={"Live":{bg:"#d1fae5",text:"#065f46",border:"#6ee7b7"},"Scheduled":{bg:"#dbeafe",text:"#1e40af",border:"#93c5fd"},"In Progress":{bg:"#e0f2fe",text:"#0c4a6e",border:"#7dd3fc"},"Ready to Schedule":{bg:"#cffafe",text:"#155e75",border:"#67e8f9"},"Staged":{bg:"#ede9fe",text:"#4c1d95",border:"#c4b5fd"},"Pre Staged":{bg:"#fef3c7",text:"#92400e",border:"#fcd34d"}};
+var SECTION_MAP={"live":"Live","scheduled":"Scheduled","in progress":"In Progress","release":"Release","prod release":"Release","production release":"Release","ready to schedule":"Ready to Schedule","staged":"Staged","pre staged":"Pre Staged","pre-staged":"Pre Staged","devops":"nextup","up next":"nextup","up next for uat":"nextup","uat":"nextup","remaining":"remaining","development":"remaining","in development":"remaining","milestones":"milestones"};
+window.onload=function(){var s=sessionStorage.getItem("asana_token_hub");if(s){document.getElementById("token-input").value=s;loadAll();}};
+function getToken(){
+  var t=document.getElementById("token-input").value.trim();
+  ["hub","cis","ps","wk","fin","sso","cl"].forEach(function(k){sessionStorage.setItem("asana_token_"+k,t);});
+  var enc=encodeURIComponent(t);
+  var links={
+    "cl-launch-btn":   "checklists_tracker.html",
+    "cis-launch-btn":  "cis_tracker.html",
+    "ps-launch-btn":   "ps_tracker.html",
+    "wk-launch-btn":   "works_tracker.html",
+    "fin-launch-btn":  "fin_tracker.html",
+    "sso-launch-btn":  "sso_tracker.html"
+  };
+  for(var id in links){
+    var el=document.getElementById(id);
+    if(el) el.href=links[id]+(t?"?token="+enc:"");
+  }
+  return t;
+}
+function apiFetch(url,token){return fetch(url,{headers:{"Authorization":"Bearer "+token,"Accept":"application/json"}}).then(function(r){if(!r.ok)return r.text().then(function(txt){throw new Error(r.status+": "+txt);});return r.json();});}
+function loadAll(){
+  var token=getToken();
+  if(!token){alert("Please paste your Asana token first.");return;}
+  document.getElementById("btn-load").disabled=true;
+  var done=0,total=INSTALL_PROJECTS.length+1;
+  function tick(){done++;if(done>=total)document.getElementById("btn-load").disabled=false;}
+  INSTALL_PROJECTS.forEach(function(p){loadInstallProject(p,token,tick);});
+  loadChecklists(token,tick);
+}
+function loadInstallProject(p,token,onDone){
+  var miniEl=document.getElementById(p.miniEl);
+  miniEl.innerHTML="<span class='loading-card'><span class='spin'></span>Loading...</span>";
+  document.getElementById(p.id+"-live").textContent="-";
+  document.getElementById(p.id+"-sched").textContent="-";
+  document.getElementById(p.id+"-other").textContent="-";
+  document.getElementById(p.tsEl).textContent="";
+  apiFetch(ASANA_BASE+"/projects/"+p.gid+"/sections?opt_fields=gid,name&limit=100",token)
+  .then(function(json){
+    var sections=json.data||[],secInfo={};
+    for(var i=0;i<sections.length;i++){
+      var sec=sections[i],key=sec.name.toLowerCase().trim(),mapped=SECTION_MAP[key]||null,grp,sta;
+      if(mapped&&mapped!=="nextup"&&mapped!=="remaining"&&mapped!=="milestones"){grp="production";sta=mapped;}
+      else if(mapped==="nextup"){grp="nextup";sta=null;}
+      else if(mapped==="milestones"){grp="milestones";sta=null;}
+      else{var lo=sec.name.toLowerCase();if(lo.indexOf("live")>=0){grp="production";sta="Live";}else if(lo.indexOf("in prog")>=0){grp="production";sta="In Progress";}else if(lo.indexOf("sched")>=0){grp="production";sta="Scheduled";}else if(lo.indexOf("ready")>=0){grp="production";sta="Ready to Schedule";}else if(lo.indexOf("stage")>=0){grp="production";sta="Staged";}else if(lo.indexOf("uat")>=0||lo.indexOf("up next")>=0){grp="nextup";sta=null;}else if(lo.indexOf("milesto")>=0){grp="milestones";sta=null;}else{grp="remaining";sta=null;}}
+      secInfo[sec.gid]={group:grp,status:sta};
+    }
+    var counts={"Live":0,"Scheduled":0,"In Progress":0,"Ready to Schedule":0,"Staged":0,"Pre Staged":0},total=0;
+    function nextSec(idx){
+      if(idx>=sections.length){updateInstallCard(p,counts,total,miniEl);if(onDone)onDone();return Promise.resolve();}
+      var sec=sections[idx],inf=secInfo[sec.gid];
+      return apiFetch(ASANA_BASE+"/sections/"+sec.gid+"/tasks?opt_fields=gid,completed&limit=100",token)
+      .then(function(tj){
+        var tasks=tj.data||[];
+        for(var j=0;j<tasks.length;j++){var t=tasks[j];if(inf.group==="milestones")continue;var keep=(inf.group==="production"||inf.group==="nextup");if(t.completed&&!keep)continue;total++;if(inf.status&&counts[inf.status]!==undefined)counts[inf.status]++;}
+        return nextSec(idx+1);
+      }).catch(function(){return nextSec(idx+1);});
+    }
+    return nextSec(0);
+  }).catch(function(e){document.getElementById(p.miniEl).innerHTML="<span class='error-small'>&#x274C; "+e.message+"</span>";if(onDone)onDone();});
+}
+function updateInstallCard(p,counts,total,miniEl){
+  var live=counts["Live"]||0,sched=counts["Scheduled"]||0;
+  document.getElementById(p.id+"-live").textContent=live;
+  document.getElementById(p.id+"-sched").textContent=sched;
+  document.getElementById(p.id+"-other").textContent=Math.max(0,total-live-sched);
+  document.getElementById(p.subEl).textContent=total+" total installs";
+  document.getElementById(p.tsEl).textContent="Updated "+new Date().toLocaleTimeString();
+  var show=["In Progress","Ready to Schedule","Staged","Pre Staged"],badges="";
+  show.forEach(function(s){if(counts[s]>0){var m=STATUS_META[s]||{};badges+="<span class='mini-badge' style='background:"+m.bg+";color:"+m.text+";border-color:"+m.border+"'>"+counts[s]+" "+s+"</span>";}});
+  miniEl.innerHTML=badges||"<span style='font-size:0.85rem;color:#9ca3af'>No active pipeline items</span>";
+}
+function loadChecklists(token,onDone){
+  document.getElementById("cl-overdue-list").innerHTML="<span class='loading-card'><span class='spin'></span>Loading...</span>";
+  document.getElementById("cl-atrisk-list").innerHTML="";
+  ["cl-complete","cl-ok","cl-warn","cl-over"].forEach(function(id){document.getElementById(id).textContent="-";});
+  apiFetch(ASANA_BASE+"/projects/"+CHECKLIST_GID+"/tasks?opt_fields=gid,name,completed,due_on&limit=100",token)
+  .then(function(json){
+    var tasks=(json.data||[]).filter(function(t){return !t.completed;});
+    if(tasks.length===0){["cl-complete","cl-ok","cl-warn","cl-over"].forEach(function(id){document.getElementById(id).textContent="0";});document.getElementById("cl-overdue-list").innerHTML="<span style='font-size:.85rem;color:#9ca3af'>None</span>";document.getElementById("cl-atrisk-list").innerHTML="<span style='font-size:.85rem;color:#9ca3af'>None</span>";document.getElementById("sub-cl").textContent="0 installations";document.getElementById("ts-cl").textContent="Updated "+new Date().toLocaleTimeString();if(onDone)onDone();return;}
+    var results=[],done=0;
+    tasks.forEach(function(task){
+      apiFetch(ASANA_BASE+"/tasks/"+task.gid+"/subtasks?opt_fields=gid,completed&limit=100",token)
+      .then(function(sj){
+        var subs=sj.data||[],comp=subs.filter(function(s){return s.completed;}).length,rem=subs.length-comp;
+        var daysLeft=task.due_on?Math.ceil((new Date(task.due_on+"T00:00:00")-new Date())/86400000):null;
+        var urgency;
+        if(rem===0)urgency="complete";
+        else if(daysLeft===null)urgency="nodate";
+        else if(daysLeft<=7)urgency="overdue";
+        else if(daysLeft<=14)urgency="atrisk";
+        else urgency="ontrack";
+        return apiFetch(ASANA_BASE+"/tasks/"+task.gid+"?opt_fields=parent.name",token)
+        .then(function(pj){
+          var parentName=(pj.data&&pj.data.parent&&pj.data.parent.name)?pj.data.parent.name:null;
+          results.push({name:task.name,parentName:parentName,daysLeft:daysLeft,rem:rem,total:subs.length,urgency:urgency});
+        }).catch(function(){
+          results.push({name:task.name,parentName:null,daysLeft:daysLeft,rem:rem,total:subs.length,urgency:urgency});
+        });
+      }).catch(function(){results.push({name:task.name,parentName:null,daysLeft:null,rem:0,total:0,urgency:"nodate"});})
+      .finally(function(){done++;if(done===tasks.length)renderChecklistCard(results,tasks.length,onDone);});
+    });
+  }).catch(function(e){document.getElementById("cl-overdue-list").innerHTML="<span style='color:#dc2626;font-size:.875rem'>&#x274C; "+e.message+"</span>";if(onDone)onDone();});
+}
+function renderChecklistCard(results,totalCount,onDone){
+  var counts={complete:0,ontrack:0,atrisk:0,overdue:0};
+  results.forEach(function(r){if(counts[r.urgency]!==undefined)counts[r.urgency]++;});
+  document.getElementById("cl-complete").textContent=counts.complete;
+  document.getElementById("cl-ok").textContent=counts.ontrack;
+  document.getElementById("cl-warn").textContent=counts.atrisk;
+  document.getElementById("cl-over").textContent=counts.overdue;  document.getElementById("sub-cl").textContent=totalCount+" installations";
+  document.getElementById("ts-cl").textContent="Updated "+new Date().toLocaleTimeString();
+  function makeRows(items){
+    if(items.length===0)return"";
+    var clHref=document.getElementById("cl-launch-btn").href;
+    return items.slice(0,8).map(function(r){
+      var dot=r.urgency==="overdue"?"#ef4444":"#f59e0b";
+      var days=r.daysLeft===null?"No date":r.daysLeft<0?Math.abs(r.daysLeft)+"d overdue":r.daysLeft+"d left";
+      var dc=r.urgency==="overdue"?"#ef4444":"#d97706";
+      var displayName=r.parentName?r.parentName:r.name;
+      return"<a href='"+clHref+"' target='_blank' class='cl-row' style='text-decoration:none;display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f9fafb;font-size:0.875rem;cursor:pointer' onmouseover=\"this.style.background='#fef3c7'\" onmouseout=\"this.style.background=''\">"+
+        "<span class='cl-dot' style='background:"+dot+"'></span>"+
+        "<span class='cl-name' title='"+displayName+"'>"+displayName+"</span>"+
+        "<span style='font-size:.72rem;color:#9ca3af;margin:0 3px'>"+r.rem+"/"+r.total+"</span>"+
+        "<span class='cl-days' style='color:"+dc+"'>"+days+"</span>"+
+      "</a>";
+    }).join("")+(items.length>8?"<div style='font-size:.78rem;color:#9ca3af;padding:4px 0'>+"+(items.length-8)+" more</div>":"");
+  }
+  var overdue=results.filter(function(r){return r.urgency==="overdue";}).sort(function(a,b){return(a.daysLeft||0)-(b.daysLeft||0);});
+  var atrisk =results.filter(function(r){return r.urgency==="atrisk"; }).sort(function(a,b){return(a.daysLeft||999)-(b.daysLeft||999);});
+  document.getElementById("cl-overdue-list").innerHTML=makeRows(overdue)||"<span style='font-size:.85rem;color:#9ca3af'>None</span>";
+  document.getElementById("cl-atrisk-list").innerHTML =makeRows(atrisk) ||"<span style='font-size:.85rem;color:#9ca3af'>None</span>";
+  if(onDone)onDone();
+}
+</script>
+</body>
+</html>
