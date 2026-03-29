@@ -113,7 +113,6 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
       <button class="btn-primary" id="btn-load" onclick="loadAll()">&#x25B6; Load All Projects</button>
     </div>
     <div id="vault-status-bar" class="vault-status"></div>
-    <p class="token-hint">Token stored in your browser session and shared with all dashboards — no need to re-enter on individual pages.</p>
   </div>
 
   <!-- ── Vault modal ── -->
@@ -299,7 +298,7 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
      VAULT JS
 ════════════════════════════════════════ -->
 <script>
-var VAULT_KEY = "centralview_vault_v2";
+var VAULT_KEY = "centralview_vault_shared_v1";
 
 var Vault = (function(){
   var _pw = null;        // master password held in memory while unlocked
@@ -403,7 +402,7 @@ var Vault = (function(){
       var entries=loadEntries();
       // Validate password against first entry if any exist
       if(entries.length>0){
-        try{ await decrypt(entries[0].encrypted, pw); }
+        try{ await decrypt(entries[0].enc, pw); }
         catch(e){ setMsg("vm-unlock-msg","Incorrect password.",false); document.getElementById("vm-unlock-pw").select(); return; }
       }
       // Unlocked!
@@ -419,7 +418,7 @@ var Vault = (function(){
       var entry=_entries.find(function(e){return e.name===name;});
       if(!entry){setMsg("vm-manage-msg","Token not found.",false);return;}
       try{
-        var tok=await decrypt(entry.encrypted,_pw);
+        var tok=await decrypt(entry.enc,_pw);
         document.getElementById("token-input").value=tok;
         setStatusBar("&#x1F513; Using token: <b>"+name+"</b>", true);
         pub.closeModal();
@@ -437,8 +436,8 @@ var Vault = (function(){
         var enc=await encrypt(tok,_pw);
         // Replace if name exists, otherwise append
         var idx=_entries.findIndex(function(e){return e.name===name;});
-        if(idx>=0) _entries[idx]={name:name,encrypted:enc};
-        else _entries.push({name:name,encrypted:enc});
+        if(idx>=0) _entries[idx]={name:name,enc:enc};
+        else _entries.push({name:name,enc:enc});
         saveEntries();
         rebuildDropdown(); renderTokenList();
         document.getElementById("vm-add-name").value="";
@@ -453,7 +452,7 @@ var Vault = (function(){
       var entry=_entries.find(function(e){return e.name===name;});
       if(!entry)return;
       try{
-        var tok=await decrypt(entry.encrypted,_pw);
+        var tok=await decrypt(entry.enc,_pw);
         document.getElementById("vm-add-name").value=name;
         document.getElementById("vm-add-tok").value=tok;
         document.getElementById("vm-add-tok").focus();
