@@ -12,14 +12,37 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
 .header p{color:#c7d2fe;font-size:1rem}
 .header-sub{color:#a5b4fc;font-size:0.85rem;margin-top:8px}
 .main{max-width:1100px;margin:-32px auto 0;padding:0 16px 48px}
-.token-bar{background:white;border:1px solid #e5e7eb;border-radius:14px;padding:20px 24px;margin-bottom:28px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
-.token-bar label{font-size:15px;font-weight:600;display:block;margin-bottom:8px;color:#374151}
-.token-row{display:flex;gap:10px;flex-wrap:wrap}
-.token-row input{flex:1;min-width:220px;padding:11px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:monospace;outline:none}
-.token-hint{font-size:13px;color:#9ca3af;margin-top:6px}
-.btn-primary{background:#4338ca;color:white;border:none;border-radius:8px;padding:11px 22px;font-size:15px;font-weight:700;cursor:pointer}
-.btn-primary:hover{background:#3730a3}
-.btn-primary:disabled{background:#a5b4fc;cursor:not-allowed}
+
+/* ── Token Vault styles ── */
+.tv-bar{background:white;border:1px solid #e5e7eb;border-radius:14px;padding:20px 24px;margin-bottom:28px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.tv-bar label{font-size:15px;font-weight:600;display:block;margin-bottom:8px;color:#374151}
+.tv-locked,.tv-unlocked{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.tv-unlocked{display:none;flex-direction:column;align-items:stretch}
+.tv-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tv-bar input[type=password],.tv-bar input[type=text],.tv-bar select{padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;background:white}
+.tv-bar select{flex:1;min-width:200px}
+.tv-bar input.tv-wide{flex:1;min-width:220px}
+.tv-bar input.tv-name{width:150px}
+.tv-bar input.tv-tok{flex:1;min-width:180px;font-family:monospace}
+.tv-hint{font-size:13px;color:#9ca3af;margin-top:4px}
+.tv-msg{font-size:13px;min-height:18px;margin-top:4px}
+.tv-msg.ok{color:#059669}.tv-msg.err{color:#dc2626}
+.tv-divider{border-top:1px solid #f3f4f6;margin-top:14px;padding-top:14px}
+.tv-manage{display:none;margin-top:12px}
+.tv-token-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tv-chip{display:inline-flex;align-items:center;gap:6px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;padding:5px 10px;font-size:13px}
+.tv-chip span{font-weight:600}
+.tv-btn{border:1px solid #e5e7eb;background:white;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;color:#374151;white-space:nowrap}
+.tv-btn:hover{background:#f1f5f9}
+.tv-btn.primary{background:#4338ca;color:white;border-color:#4338ca}
+.tv-btn.primary:hover{background:#3730a3}
+.tv-btn.primary:disabled{background:#a5b4fc;cursor:not-allowed}
+.tv-btn.danger{color:#dc2626;border-color:#fca5a5}
+.tv-btn.danger:hover{background:#fef2f2}
+.tv-btn.sm{padding:3px 9px;font-size:12px}
+.tv-manual-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid #f3f4f6}
+
+/* ── Dashboard styles ── */
 .checklist-card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:20px}
 .checklist-card:hover{box-shadow:0 6px 20px rgba(0,0,0,0.1)}
 .cl-header{padding:22px 24px;background:linear-gradient(135deg,#b45309,#f59e0b);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
@@ -69,17 +92,66 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
 <div class="header">
   <h1>&#x1F4CB; CentralView ERP Install Hub</h1>
   <p>Live install dashboards for all products — powered by Asana</p>
-  <p class="header-sub">Enter your token once below to load live stats across all projects</p>
+  <p class="header-sub">Unlock your vault below to load live stats across all projects</p>
 </div>
+
 <div class="main">
-  <div class="token-bar">
-    <label>Asana Personal Access Token</label>
-    <div class="token-row">
-      <input type="password" id="token-input" placeholder="Paste your Asana Personal Access Token here..." onkeydown="if(event.key==='Enter')loadAll()"/>
-      <button class="btn-primary" id="btn-load" onclick="loadAll()">&#x25B6; Load All Projects</button>
+
+  <!-- ── TOKEN VAULT ── -->
+  <div class="tv-bar" id="tv-bar">
+
+    <!-- LOCKED STATE -->
+    <div id="tv-locked">
+      <label>&#x1F512; Token Vault</label>
+      <div class="tv-locked">
+        <input type="password" id="tv-pw" class="tv-wide" placeholder="Enter master password to unlock vault..."
+               onkeydown="if(event.key==='Enter')TokenVault._unlock()"/>
+        <button class="tv-btn primary" onclick="TokenVault._unlock()">Unlock</button>
+      </div>
+      <p id="tv-lock-msg" class="tv-msg err"></p>
+      <p class="tv-hint">Tokens are AES-256-GCM encrypted and stored locally. Enter your master password to access them.</p>
     </div>
-    <p class="token-hint">Token stored in your browser session and shared with all dashboards — no need to re-enter on individual pages.</p>
+
+    <!-- UNLOCKED STATE -->
+    <div id="tv-unlocked" style="display:none">
+      <label>&#x1F513; Token Vault</label>
+
+      <!-- Select + actions row -->
+      <div class="tv-row">
+        <select id="tv-select" onchange="TokenVault._onSelect()">
+          <option value="">— select a saved token —</option>
+        </select>
+        <button class="tv-btn primary" id="tv-btn-load" onclick="TokenVault._triggerLoad()" disabled>&#x25B6; Use Token</button>
+        <button class="tv-btn" onclick="TokenVault._lock()">&#x1F512; Lock</button>
+        <button class="tv-btn" id="tv-btn-manage" onclick="TokenVault._toggleManage()">&#x2699;&#xFE0F; Manage</button>
+      </div>
+      <p class="tv-hint" id="tv-sel-hint">Select a token then click Use Token.</p>
+
+      <!-- Manual token entry -->
+      <div class="tv-manual-row">
+        <span style="font-size:13px;color:#6b7280;white-space:nowrap">Or use token once:</span>
+        <input type="password" id="tv-manual-tok" class="tv-tok" placeholder="Paste token manually (not saved)..."
+               onkeydown="if(event.key==='Enter')TokenVault._useManual()"/>
+        <button class="tv-btn" onclick="TokenVault._useManual()">&#x25B6; Use</button>
+      </div>
+
+      <!-- Manage panel -->
+      <div class="tv-manage" id="tv-manage">
+        <div class="tv-divider">
+          <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:8px">Add a new token</div>
+          <div class="tv-row">
+            <input type="text"     id="tv-add-name" class="tv-name" placeholder="Name (e.g. My Token)"/>
+            <input type="password" id="tv-add-tok"  class="tv-tok"  placeholder="Paste token value"/>
+            <button class="tv-btn" onclick="TokenVault._add()">&#xFF0B; Save</button>
+          </div>
+          <p id="tv-add-msg" class="tv-msg"></p>
+          <div class="tv-token-list" id="tv-token-list"></div>
+        </div>
+      </div>
+    </div>
+
   </div>
+  <!-- ── END TOKEN VAULT ── -->
 
   <div class="checklist-card">
     <div class="cl-header">
@@ -196,6 +268,155 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
     </div>
   </div>
 </div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TOKEN VAULT JS
+     ══════════════════════════════════════════════════════════ -->
+<script>
+var TokenVault = (function(){
+  var VAULT_KEY = "centralview_vault_v1";
+  var _pw = null, _data = [];
+
+  /* ── crypto helpers ── */
+  async function deriveKey(pw, salt){
+    var km = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:310000,hash:"SHA-256"}, km, {name:"AES-GCM",length:256}, false, ["encrypt","decrypt"]);
+  }
+  async function encrypt(text, pw){
+    var salt=crypto.getRandomValues(new Uint8Array(16)), iv=crypto.getRandomValues(new Uint8Array(12));
+    var key=await deriveKey(pw,salt);
+    var ct=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,new TextEncoder().encode(text));
+    var buf=new Uint8Array(28+ct.byteLength);
+    buf.set(salt,0);buf.set(iv,16);buf.set(new Uint8Array(ct),28);
+    return btoa(String.fromCharCode(...buf));
+  }
+  async function decrypt(b64, pw){
+    var buf=Uint8Array.from(atob(b64),function(c){return c.charCodeAt(0);});
+    var key=await deriveKey(pw,buf.slice(0,16));
+    var plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:buf.slice(16,28)},key,buf.slice(28));
+    return new TextDecoder().decode(plain);
+  }
+
+  /* ── storage ── */
+  function load(){ try{var r=localStorage.getItem(VAULT_KEY);return r?JSON.parse(r):[];}catch(e){return[];} }
+  function save(d){ localStorage.setItem(VAULT_KEY,JSON.stringify(d)); _data=d; }
+
+  /* ── dropdown ── */
+  function rebuildDropdown(){
+    var sel=document.getElementById("tv-select"), cur=sel.value;
+    sel.innerHTML="<option value=''>— select a saved token —</option>";
+    _data.forEach(function(e){ var o=document.createElement("option");o.value=e.name;o.textContent=e.name;sel.appendChild(o); });
+    if(cur)sel.value=cur;
+  }
+  function renderChips(){
+    var el=document.getElementById("tv-token-list");
+    if(!_data.length){el.innerHTML="<span style='font-size:13px;color:#9ca3af'>No tokens saved yet.</span>";return;}
+    el.innerHTML=_data.map(function(e){
+      return "<span class='tv-chip'><span>"+e.name+"</span>"+
+             "<button class='tv-btn danger sm' onclick='TokenVault._delete(\""+e.name+"\")'>✕</button></span>";
+    }).join("");
+  }
+
+  var pub = {
+    onToken: null,
+
+    getToken: async function(){
+      var name=document.getElementById("tv-select").value;
+      if(!name)return null;
+      var entry=_data.find(function(e){return e.name===name;});
+      if(!entry)return null;
+      try{return await decrypt(entry.encrypted,_pw);}catch(e){return null;}
+    },
+
+    _unlock: async function(){
+      var pw=document.getElementById("tv-pw").value;
+      var msg=document.getElementById("tv-lock-msg");
+      msg.textContent="";
+      if(!pw){msg.textContent="Enter your master password.";return;}
+      var data=load();
+      if(data.length>0){
+        try{await decrypt(data[0].encrypted,pw);}
+        catch(e){msg.textContent="Incorrect password.";return;}
+      }
+      _pw=pw; _data=data;
+      document.getElementById("tv-locked").style.display="none";
+      document.getElementById("tv-unlocked").style.display="block";
+      document.getElementById("tv-pw").value="";
+      rebuildDropdown();
+      if(_data.length===1){ document.getElementById("tv-select").value=_data[0].name; pub._onSelect(); }
+    },
+
+    _lock: function(){
+      _pw=null; _data=[];
+      document.getElementById("tv-locked").style.display="block";
+      document.getElementById("tv-unlocked").style.display="none";
+      document.getElementById("tv-manage").style.display="none";
+      document.getElementById("tv-btn-load").disabled=true;
+    },
+
+    _onSelect: function(){
+      var name=document.getElementById("tv-select").value;
+      document.getElementById("tv-btn-load").disabled=!name;
+      document.getElementById("tv-sel-hint").textContent=name
+        ? "Token \""+name+"\" selected — click Use Token."
+        : "Select a token then click Use Token.";
+    },
+
+    _triggerLoad: async function(){
+      var tok=await pub.getToken();
+      if(!tok){alert("Could not decrypt token. Please re-unlock the vault.");return;}
+      if(typeof pub.onToken==="function") pub.onToken(tok);
+    },
+
+    _useManual: function(){
+      var tok=document.getElementById("tv-manual-tok").value.trim();
+      if(!tok){alert("Please paste a token first.");return;}
+      document.getElementById("tv-manual-tok").value="";
+      if(typeof pub.onToken==="function") pub.onToken(tok);
+    },
+
+    _toggleManage: function(){
+      var m=document.getElementById("tv-manage");
+      var open=m.style.display==="block";
+      m.style.display=open?"none":"block";
+      document.getElementById("tv-btn-manage").textContent=open?"⚙️ Manage":"✖ Close";
+      if(!open)renderChips();
+    },
+
+    _add: async function(){
+      var name=document.getElementById("tv-add-name").value.trim();
+      var tok=document.getElementById("tv-add-tok").value.trim();
+      var msg=document.getElementById("tv-add-msg");
+      msg.className="tv-msg"; msg.textContent="";
+      if(!name){msg.className="tv-msg err";msg.textContent="Enter a name.";return;}
+      if(!tok) {msg.className="tv-msg err";msg.textContent="Enter the token value.";return;}
+      if(_data.find(function(e){return e.name===name;})){msg.className="tv-msg err";msg.textContent="Name already exists.";return;}
+      try{
+        var enc=await encrypt(tok,_pw);
+        save(_data.concat([{name:name,encrypted:enc}]));
+        rebuildDropdown(); renderChips();
+        document.getElementById("tv-add-name").value="";
+        document.getElementById("tv-add-tok").value="";
+        msg.className="tv-msg ok"; msg.textContent="\""+name+"\" saved.";
+        setTimeout(function(){msg.textContent="";},3000);
+      }catch(e){msg.className="tv-msg err";msg.textContent="Encryption failed.";}
+    },
+
+    _delete: function(name){
+      if(!confirm("Delete token \""+name+"\"?"))return;
+      save(_data.filter(function(e){return e.name!==name;}));
+      rebuildDropdown(); renderChips();
+      var sel=document.getElementById("tv-select");
+      if(sel.value===name){sel.value="";pub._onSelect();}
+    }
+  };
+  return pub;
+})();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════
+     DASHBOARD JS  — TokenVault.onToken wired to loadAll()
+     ══════════════════════════════════════════════════════════ -->
 <script>
 var ASANA_BASE="https://app.asana.com/api/1.0",CHECKLIST_GID="1213736136206851";
 var INSTALL_PROJECTS=[
@@ -207,35 +428,46 @@ var INSTALL_PROJECTS=[
 ];
 var STATUS_META={"Live":{bg:"#d1fae5",text:"#065f46",border:"#6ee7b7"},"Scheduled":{bg:"#dbeafe",text:"#1e40af",border:"#93c5fd"},"In Progress":{bg:"#e0f2fe",text:"#0c4a6e",border:"#7dd3fc"},"Ready to Schedule":{bg:"#cffafe",text:"#155e75",border:"#67e8f9"},"Staged":{bg:"#ede9fe",text:"#4c1d95",border:"#c4b5fd"},"Pre Staged":{bg:"#fef3c7",text:"#92400e",border:"#fcd34d"}};
 var SECTION_MAP={"live":"Live","scheduled":"Scheduled","in progress":"In Progress","release":"Release","prod release":"Release","production release":"Release","ready to schedule":"Ready to Schedule","staged":"Staged","pre staged":"Pre Staged","pre-staged":"Pre Staged","devops":"nextup","up next":"nextup","up next for uat":"nextup","uat":"nextup","remaining":"remaining","development":"remaining","in development":"remaining","milestones":"milestones"};
-window.onload=function(){var s=sessionStorage.getItem("asana_token_hub");if(s){document.getElementById("token-input").value=s;loadAll();}};
-function getToken(){
-  var t=document.getElementById("token-input").value.trim();
-  ["hub","cis","ps","wk","fin","sso","cl"].forEach(function(k){sessionStorage.setItem("asana_token_"+k,t);});
-  var enc=encodeURIComponent(t);
+
+/* Wire vault → loadAll */
+TokenVault.onToken = function(token){
+  updateLaunchLinks(token);
+  loadAll(token);
+};
+
+function updateLaunchLinks(token){
+  var enc=encodeURIComponent(token);
   var links={
-    "cl-launch-btn":   "checklists_tracker.html",
-    "cis-launch-btn":  "cis_tracker.html",
-    "ps-launch-btn":   "ps_tracker.html",
-    "wk-launch-btn":   "works_tracker.html",
-    "fin-launch-btn":  "fin_tracker.html",
-    "sso-launch-btn":  "sso_tracker.html"
+    "cl-launch-btn":  "checklists_tracker.html",
+    "cis-launch-btn": "cis_tracker.html",
+    "ps-launch-btn":  "ps_tracker.html",
+    "wk-launch-btn":  "works_tracker.html",
+    "fin-launch-btn": "fin_tracker.html",
+    "sso-launch-btn": "sso_tracker.html"
   };
   for(var id in links){
     var el=document.getElementById(id);
-    if(el) el.href=links[id]+(t?"?token="+enc:"");
+    if(el) el.href=links[id]+(token?"?token="+enc:"");
   }
-  return t;
+  /* Also push to sessionStorage so child pages can read it */
+  ["hub","cis","ps","wk","fin","sso","cl"].forEach(function(k){
+    sessionStorage.setItem("asana_token_"+k, token);
+  });
+  sessionStorage.setItem("asana_token_hub", token);
 }
-function apiFetch(url,token){return fetch(url,{headers:{"Authorization":"Bearer "+token,"Accept":"application/json"}}).then(function(r){if(!r.ok)return r.text().then(function(txt){throw new Error(r.status+": "+txt);});return r.json();});}
-function loadAll(){
-  var token=getToken();
-  if(!token){alert("Please paste your Asana token first.");return;}
-  document.getElementById("btn-load").disabled=true;
-  var done=0,total=INSTALL_PROJECTS.length+1;
-  function tick(){done++;if(done>=total)document.getElementById("btn-load").disabled=false;}
+
+function apiFetch(url,token){
+  return fetch(url,{headers:{"Authorization":"Bearer "+token,"Accept":"application/json"}})
+    .then(function(r){if(!r.ok)return r.text().then(function(txt){throw new Error(r.status+": "+txt);});return r.json();});
+}
+
+function loadAll(token){
+  var done=0, total=INSTALL_PROJECTS.length+1;
+  function tick(){done++;}
   INSTALL_PROJECTS.forEach(function(p){loadInstallProject(p,token,tick);});
   loadChecklists(token,tick);
 }
+
 function loadInstallProject(p,token,onDone){
   var miniEl=document.getElementById(p.miniEl);
   miniEl.innerHTML="<span class='loading-card'><span class='spin'></span>Loading...</span>";
@@ -268,6 +500,7 @@ function loadInstallProject(p,token,onDone){
     return nextSec(0);
   }).catch(function(e){document.getElementById(p.miniEl).innerHTML="<span class='error-small'>&#x274C; "+e.message+"</span>";if(onDone)onDone();});
 }
+
 function updateInstallCard(p,counts,total,miniEl){
   var live=counts["Live"]||0,sched=counts["Scheduled"]||0;
   document.getElementById(p.id+"-live").textContent=live;
@@ -279,6 +512,7 @@ function updateInstallCard(p,counts,total,miniEl){
   show.forEach(function(s){if(counts[s]>0){var m=STATUS_META[s]||{};badges+="<span class='mini-badge' style='background:"+m.bg+";color:"+m.text+";border-color:"+m.border+"'>"+counts[s]+" "+s+"</span>";}});
   miniEl.innerHTML=badges||"<span style='font-size:0.85rem;color:#9ca3af'>No active pipeline items</span>";
 }
+
 function loadChecklists(token,onDone){
   document.getElementById("cl-overdue-list").innerHTML="<span class='loading-card'><span class='spin'></span>Loading...</span>";
   document.getElementById("cl-atrisk-list").innerHTML="";
@@ -311,13 +545,15 @@ function loadChecklists(token,onDone){
     });
   }).catch(function(e){document.getElementById("cl-overdue-list").innerHTML="<span style='color:#dc2626;font-size:.875rem'>&#x274C; "+e.message+"</span>";if(onDone)onDone();});
 }
+
 function renderChecklistCard(results,totalCount,onDone){
   var counts={complete:0,ontrack:0,atrisk:0,overdue:0};
   results.forEach(function(r){if(counts[r.urgency]!==undefined)counts[r.urgency]++;});
   document.getElementById("cl-complete").textContent=counts.complete;
   document.getElementById("cl-ok").textContent=counts.ontrack;
   document.getElementById("cl-warn").textContent=counts.atrisk;
-  document.getElementById("cl-over").textContent=counts.overdue;  document.getElementById("sub-cl").textContent=totalCount+" installations";
+  document.getElementById("cl-over").textContent=counts.overdue;
+  document.getElementById("sub-cl").textContent=totalCount+" installations";
   document.getElementById("ts-cl").textContent="Updated "+new Date().toLocaleTimeString();
   function makeRows(items){
     if(items.length===0)return"";
