@@ -46,10 +46,6 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
 .vm-msg{font-size:13px;min-height:18px;margin-top:10px;text-align:center}
 .vm-msg.ok{color:#059669}.vm-msg.err{color:#dc2626}
 .vm-divider{border-top:1px solid #f3f4f6;margin:16px 0}
-.vm-saved-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid #f9fafb}
-.vm-saved-row:last-child{border-bottom:none}
-.vm-del{background:none;border:none;color:#dc2626;cursor:pointer;font-size:12px;padding:2px 6px;border-radius:4px}
-.vm-del:hover{background:#fef2f2}
 /* vault status badge in token bar */
 .vault-status{font-size:12px;color:#6b7280;display:flex;align-items:center;gap:5px;margin-top:7px}
 .vault-status.saved{color:#059669}
@@ -125,61 +121,59 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
   <div class="vault-modal-bg" id="vault-modal-bg" onclick="if(event.target===this)Vault.closeModal()">
     <div class="vault-modal">
       <button class="vm-close" onclick="Vault.closeModal()">&#x2715;</button>
-      <h3 id="vm-title">&#x1F512; Token Vault</h3>
-      <p class="vm-sub" id="vm-sub">Save your token encrypted with a master password so you don't have to paste it every time.</p>
+      <h3>&#x1F512; Token Vault</h3>
+      <p class="vm-sub" id="vm-sub">AES-256 encrypted token storage — unlock once per session.</p>
 
-      <!-- Panel: no vault yet → set up -->
-      <div id="vm-panel-setup">
-        <div class="vm-field">
-          <label>Token to save</label>
-          <input type="password" id="vm-setup-tok" placeholder="Paste token (or leave blank to use current)"/>
-        </div>
-        <div class="vm-field">
-          <label>Choose a master password</label>
-          <input type="password" id="vm-setup-pw1" placeholder="Master password"/>
-        </div>
-        <div class="vm-field">
-          <label>Confirm master password</label>
-          <input type="password" id="vm-setup-pw2" placeholder="Confirm password" onkeydown="if(event.key==='Enter')Vault.setupSave()"/>
-        </div>
-        <div class="vm-actions">
-          <button class="vm-btn secondary" onclick="Vault.closeModal()">Cancel</button>
-          <button class="vm-btn primary" onclick="Vault.setupSave()">&#x1F512; Encrypt &amp; Save</button>
-        </div>
-        <p id="vm-setup-msg" class="vm-msg"></p>
-      </div>
-
-      <!-- Panel: vault exists → unlock -->
-      <div id="vm-panel-unlock" style="display:none">
+      <!-- Panel: unlock (first thing shown if vault exists) -->
+      <div id="vm-panel-unlock">
         <div class="vm-field">
           <label>Master password</label>
           <input type="password" id="vm-unlock-pw" placeholder="Enter master password..." onkeydown="if(event.key==='Enter')Vault.unlock()"/>
         </div>
         <div class="vm-actions">
           <button class="vm-btn secondary" onclick="Vault.resetVault()">&#x1F5D1; Clear Vault</button>
-          <button class="vm-btn primary" onclick="Vault.unlock()">&#x1F513; Unlock &amp; Load</button>
+          <button class="vm-btn primary" onclick="Vault.unlock()">&#x1F513; Unlock</button>
         </div>
         <p id="vm-unlock-msg" class="vm-msg"></p>
+        <p style="font-size:12px;color:#9ca3af;margin-top:10px">No vault yet? Unlock with any password to create one.</p>
       </div>
 
-      <!-- Panel: unlocked → manage -->
+      <!-- Panel: unlocked → select + manage -->
       <div id="vm-panel-manage" style="display:none">
-        <p style="font-size:13px;color:#059669;font-weight:600;margin-bottom:12px">&#x2714; Vault unlocked — token loaded successfully.</p>
-        <div class="vm-divider"></div>
-        <p style="font-size:13px;color:#6b7280;margin-bottom:10px">Want to save a different token?</p>
+
+        <!-- Select a token -->
         <div class="vm-field">
-          <label>New token</label>
-          <input type="password" id="vm-update-tok" placeholder="Paste new token value"/>
+          <label>Select saved token</label>
+          <div style="display:flex;gap:8px">
+            <select id="vm-select" style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none">
+              <option value="">— choose a token —</option>
+            </select>
+            <button class="vm-btn primary" onclick="Vault.useSelected()">&#x25B6; Use</button>
+          </div>
+        </div>
+
+        <div class="vm-divider"></div>
+
+        <!-- Add new token -->
+        <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:8px">&#xFF0B; Add / Edit Token</div>
+        <div class="vm-field">
+          <label>Token name</label>
+          <input type="text" id="vm-add-name" placeholder="e.g. Production, My Token…"/>
         </div>
         <div class="vm-field">
-          <label>Master password (to re-encrypt)</label>
-          <input type="password" id="vm-update-pw" placeholder="Master password" onkeydown="if(event.key==='Enter')Vault.updateToken()"/>
+          <label>Token value</label>
+          <input type="password" id="vm-add-tok" placeholder="Paste Asana personal access token" onkeydown="if(event.key==='Enter')Vault.addToken()"/>
         </div>
         <div class="vm-actions">
-          <button class="vm-btn secondary" onclick="Vault.resetVault()">&#x1F5D1; Clear Vault</button>
-          <button class="vm-btn primary" onclick="Vault.updateToken()">&#x1F504; Update Token</button>
+          <button class="vm-btn secondary" onclick="Vault.deleteSelected()">&#x1F5D1; Delete Selected</button>
+          <button class="vm-btn primary" onclick="Vault.addToken()">&#x1F4BE; Save Token</button>
         </div>
         <p id="vm-manage-msg" class="vm-msg"></p>
+
+        <!-- Saved tokens list -->
+        <div class="vm-divider"></div>
+        <div id="vm-token-list" style="font-size:13px;color:#6b7280"></div>
+
       </div>
 
     </div>
@@ -306,9 +300,12 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
      VAULT JS
 ════════════════════════════════════════ -->
 <script>
-var VAULT_KEY = "centralview_vault_v1";
+var VAULT_KEY = "centralview_vault_v2";
 
 var Vault = (function(){
+  var _pw = null;        // master password held in memory while unlocked
+  var _entries = [];     // [{name, encrypted}]
+
   /* ── crypto ── */
   async function deriveKey(pw, salt){
     var km = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
@@ -323,13 +320,54 @@ var Vault = (function(){
     return btoa(String.fromCharCode(...buf));
   }
   async function decrypt(b64, pw){
-    var buf=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+    var buf=Uint8Array.from(atob(b64),function(c){return c.charCodeAt(0);});
     var key=await deriveKey(pw,buf.slice(0,16));
     var plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:buf.slice(16,28)},key,buf.slice(28));
     return new TextDecoder().decode(plain);
   }
 
-  function hasVault(){ return !!localStorage.getItem(VAULT_KEY); }
+  /* ── localStorage: stores JSON array of {name, encrypted} ── */
+  function loadEntries(){ try{var r=localStorage.getItem(VAULT_KEY);return r?JSON.parse(r):[];}catch(e){return[];} }
+  function saveEntries(){ localStorage.setItem(VAULT_KEY, JSON.stringify(_entries)); }
+
+  /* ── UI helpers ── */
+  function showPanel(name){
+    ["unlock","manage"].forEach(function(p){
+      document.getElementById("vm-panel-"+p).style.display = p===name?"block":"none";
+    });
+  }
+  function setMsg(id, text, ok){
+    var el=document.getElementById(id);
+    el.className="vm-msg"+(ok?" ok":" err");
+    el.textContent=text;
+  }
+  function clearMsg(id){ var el=document.getElementById(id); el.className="vm-msg"; el.textContent=""; }
+
+  function rebuildDropdown(){
+    var sel=document.getElementById("vm-select");
+    var cur=sel.value;
+    sel.innerHTML="<option value=''>— choose a token —</option>";
+    _entries.forEach(function(e){
+      var o=document.createElement("option");
+      o.value=e.name; o.textContent=e.name;
+      sel.appendChild(o);
+    });
+    if(cur && _entries.find(function(e){return e.name===cur;})) sel.value=cur;
+  }
+
+  function renderTokenList(){
+    var el=document.getElementById("vm-token-list");
+    if(!_entries.length){el.innerHTML="<span style='color:#9ca3af'>No tokens saved yet.</span>";return;}
+    el.innerHTML="<div style='font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-bottom:6px'>Saved tokens</div>"+
+      _entries.map(function(e){
+        return "<div style='display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:13px'>"
+          +"<span style='font-weight:600;color:#374151'>"+e.name+"</span>"
+          +"<div style='display:flex;gap:6px'>"
+          +"<button class='vm-btn secondary' style='padding:3px 10px;font-size:12px' onclick='Vault.editEntry(\""+e.name+"\")'>&#x270E; Edit</button>"
+          +"<button class='vm-btn' style='padding:3px 10px;font-size:12px;color:#dc2626;border-color:#fca5a5' onclick='Vault.deleteEntry(\""+e.name+"\")'>&#x1F5D1;</button>"
+          +"</div></div>";
+      }).join("");
+  }
 
   function setStatusBar(msg, ok){
     var el=document.getElementById("vault-status-bar");
@@ -337,112 +375,127 @@ var Vault = (function(){
     el.innerHTML=msg;
   }
 
-  function showPanel(name){
-    ["setup","unlock","manage"].forEach(function(p){
-      document.getElementById("vm-panel-"+p).style.display = p===name ? "block" : "none";
-    });
-  }
-
-  return {
+  var pub = {
     openModal: function(){
-      // Pre-fill token field with whatever is currently in the input
-      var cur = document.getElementById("token-input").value.trim();
-      if(cur) document.getElementById("vm-setup-tok").value = cur;
-
-      showPanel(hasVault() ? "unlock" : "setup");
+      clearMsg("vm-unlock-msg"); clearMsg("vm-manage-msg");
+      document.getElementById("vm-unlock-pw").value="";
+      if(_pw){
+        // already unlocked this session
+        rebuildDropdown(); renderTokenList();
+        showPanel("manage");
+      } else {
+        showPanel("unlock");
+        setTimeout(function(){document.getElementById("vm-unlock-pw").focus();},50);
+      }
       document.getElementById("vault-modal-bg").classList.add("open");
-      // focus first input of visible panel
-      setTimeout(function(){
-        var focused = hasVault()
-          ? document.getElementById("vm-unlock-pw")
-          : document.getElementById("vm-setup-tok");
-        focused.focus();
-      }, 50);
     },
 
     closeModal: function(){
       document.getElementById("vault-modal-bg").classList.remove("open");
-      // clear sensitive fields
-      ["vm-setup-tok","vm-setup-pw1","vm-setup-pw2","vm-unlock-pw","vm-update-tok","vm-update-pw"].forEach(function(id){
-        document.getElementById(id).value="";
-      });
-      ["vm-setup-msg","vm-unlock-msg","vm-manage-msg"].forEach(function(id){
-        document.getElementById(id).textContent="";
-      });
-    },
-
-    setupSave: async function(){
-      var tok  = document.getElementById("vm-setup-tok").value.trim()
-               || document.getElementById("token-input").value.trim();
-      var pw1  = document.getElementById("vm-setup-pw1").value;
-      var pw2  = document.getElementById("vm-setup-pw2").value;
-      var msg  = document.getElementById("vm-setup-msg");
-      msg.className="vm-msg"; msg.textContent="";
-      if(!tok){msg.className="vm-msg err";msg.textContent="Paste a token first (or load one into the token bar).";return;}
-      if(!pw1){msg.className="vm-msg err";msg.textContent="Enter a master password.";return;}
-      if(pw1!==pw2){msg.className="vm-msg err";msg.textContent="Passwords don't match.";return;}
-      try{
-        var enc=await encrypt(tok,pw1);
-        localStorage.setItem(VAULT_KEY, enc);
-        msg.className="vm-msg ok"; msg.textContent="✔ Token encrypted and saved!";
-        setStatusBar("&#x1F512; Token saved in vault — click <b>🔒 Vault</b> to unlock on next visit.", true);
-        setTimeout(function(){ Vault.closeModal(); },1200);
-      }catch(e){msg.className="vm-msg err";msg.textContent="Encryption failed: "+e.message;}
+      document.getElementById("vm-add-name").value="";
+      document.getElementById("vm-add-tok").value="";
+      clearMsg("vm-manage-msg");
     },
 
     unlock: async function(){
       var pw  = document.getElementById("vm-unlock-pw").value;
-      var msg = document.getElementById("vm-unlock-msg");
-      msg.className="vm-msg"; msg.textContent="";
-      if(!pw){msg.className="vm-msg err";msg.textContent="Enter your master password.";return;}
-      var enc = localStorage.getItem(VAULT_KEY);
-      if(!enc){msg.className="vm-msg err";msg.textContent="No vault found.";return;}
-      try{
-        var tok=await decrypt(enc,pw);
-        // Put token into the main input and fire loadAll
-        document.getElementById("token-input").value=tok;
-        setStatusBar("&#x1F513; Vault unlocked — token loaded.", true);
-        showPanel("manage");
-        setTimeout(function(){ Vault.closeModal(); loadAll(); },900);
-      }catch(e){
-        msg.className="vm-msg err";
-        msg.textContent="Incorrect password.";
-        document.getElementById("vm-unlock-pw").select();
+      clearMsg("vm-unlock-msg");
+      if(!pw){setMsg("vm-unlock-msg","Enter your master password.",false);return;}
+      var entries=loadEntries();
+      // Validate password against first entry if any exist
+      if(entries.length>0){
+        try{ await decrypt(entries[0].encrypted, pw); }
+        catch(e){ setMsg("vm-unlock-msg","Incorrect password.",false); document.getElementById("vm-unlock-pw").select(); return; }
       }
+      // Unlocked!
+      _pw=pw; _entries=entries;
+      setStatusBar("&#x1F513; Vault unlocked — "+_entries.length+" token(s) available.", true);
+      rebuildDropdown(); renderTokenList();
+      showPanel("manage");
     },
 
-    updateToken: async function(){
-      var tok = document.getElementById("vm-update-tok").value.trim();
-      var pw  = document.getElementById("vm-update-pw").value;
-      var msg = document.getElementById("vm-manage-msg");
-      msg.className="vm-msg"; msg.textContent="";
-      if(!tok){msg.className="vm-msg err";msg.textContent="Paste a new token.";return;}
-      if(!pw) {msg.className="vm-msg err";msg.textContent="Enter your master password.";return;}
+    useSelected: async function(){
+      var name=document.getElementById("vm-select").value;
+      if(!name){setMsg("vm-manage-msg","Select a token first.",false);return;}
+      var entry=_entries.find(function(e){return e.name===name;});
+      if(!entry){setMsg("vm-manage-msg","Token not found.",false);return;}
       try{
-        var enc=await encrypt(tok,pw);
-        localStorage.setItem(VAULT_KEY,enc);
+        var tok=await decrypt(entry.encrypted,_pw);
         document.getElementById("token-input").value=tok;
-        msg.className="vm-msg ok"; msg.textContent="✔ Token updated!";
-        setTimeout(function(){ Vault.closeModal(); loadAll(); },900);
-      }catch(e){msg.className="vm-msg err";msg.textContent="Failed: "+e.message;}
+        setStatusBar("&#x1F513; Using token: <b>"+name+"</b>", true);
+        pub.closeModal();
+        loadAll();
+      }catch(e){setMsg("vm-manage-msg","Decryption failed.",false);}
+    },
+
+    addToken: async function(){
+      var name=document.getElementById("vm-add-name").value.trim();
+      var tok =document.getElementById("vm-add-tok").value.trim();
+      clearMsg("vm-manage-msg");
+      if(!name){setMsg("vm-manage-msg","Enter a token name.",false);return;}
+      if(!tok) {setMsg("vm-manage-msg","Paste the token value.",false);return;}
+      try{
+        var enc=await encrypt(tok,_pw);
+        // Replace if name exists, otherwise append
+        var idx=_entries.findIndex(function(e){return e.name===name;});
+        if(idx>=0) _entries[idx]={name:name,encrypted:enc};
+        else _entries.push({name:name,encrypted:enc});
+        saveEntries();
+        rebuildDropdown(); renderTokenList();
+        document.getElementById("vm-add-name").value="";
+        document.getElementById("vm-add-tok").value="";
+        document.getElementById("vm-select").value=name;
+        setMsg("vm-manage-msg","✔ \""+name+"\" saved.",true);
+        setTimeout(function(){clearMsg("vm-manage-msg");},2500);
+      }catch(e){setMsg("vm-manage-msg","Encryption failed.",false);}
+    },
+
+    editEntry: async function(name){
+      var entry=_entries.find(function(e){return e.name===name;});
+      if(!entry)return;
+      try{
+        var tok=await decrypt(entry.encrypted,_pw);
+        document.getElementById("vm-add-name").value=name;
+        document.getElementById("vm-add-tok").value=tok;
+        document.getElementById("vm-add-tok").focus();
+      }catch(e){setMsg("vm-manage-msg","Could not load token for editing.",false);}
+    },
+
+    deleteEntry: function(name){
+      if(!confirm("Delete token \""+name+"\"?"))return;
+      _entries=_entries.filter(function(e){return e.name!==name;});
+      saveEntries();
+      rebuildDropdown(); renderTokenList();
+      var sel=document.getElementById("vm-select");
+      if(sel.value===name) sel.value="";
+    },
+
+    deleteSelected: function(){
+      var name=document.getElementById("vm-select").value;
+      if(!name){setMsg("vm-manage-msg","Select a token to delete.",false);return;}
+      pub.deleteEntry(name);
     },
 
     resetVault: function(){
-      if(!confirm("Clear the saved vault? You'll need to paste your token again next time."))return;
+      if(!confirm("Clear the ENTIRE vault? All saved tokens will be deleted."))return;
       localStorage.removeItem(VAULT_KEY);
+      _pw=null; _entries=[];
       setStatusBar("Vault cleared.", false);
-      showPanel("setup");
+      showPanel("unlock");
     }
   };
+  return pub;
 })();
 
-/* Show vault status on load if a vault exists */
+/* Show hint on load if vault has entries */
 window.addEventListener("load", function(){
-  if(localStorage.getItem(VAULT_KEY)){
-    document.getElementById("vault-status-bar").innerHTML=
-      "&#x1F512; Saved token found — click <b>🔒 Vault</b> and enter your master password to load it.";
-  }
-  // Original session restore
+  try{
+    var entries=JSON.parse(localStorage.getItem(VAULT_KEY)||"[]");
+    if(entries.length){
+      document.getElementById("vault-status-bar").innerHTML=
+        "&#x1F512; "+entries.length+" token(s) in vault — click <b>🔒 Vault</b> and enter your master password.";
+    }
+  }catch(e){}
   var s=sessionStorage.getItem("asana_token_hub");
   if(s){ document.getElementById("token-input").value=s; loadAll(); }
 });
