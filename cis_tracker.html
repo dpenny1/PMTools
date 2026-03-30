@@ -93,6 +93,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#f9fafb}
         <option value="">All Statuses</option>
         <option>Live</option><option>Scheduled</option><option>In Progress</option>
         <option>Ready to Schedule</option><option>Staged</option><option>Pre Staged</option>
+        <option>UAT</option><option>Release</option>
       </select>
       <button onclick="clearFilters()" style="font-size:.9rem;color:#ef4444;background:none;border:none;cursor:pointer;text-decoration:underline">Clear</button>
     </div>
@@ -107,9 +108,9 @@ var PROJECT_GID="1211708203704329",ASANA_BASE="https://app.asana.com/api/1.0";
 var GITHUB_FIELD_GID=null;
 var SECTION_MAP={"live":{group:"production",status:"Live"},"scheduled":{group:"production",status:"Scheduled"},"in progress":{group:"production",status:"In Progress"},"release":{group:"production",status:"Release"},"prod release":{group:"production",status:"Release"},"production release":{group:"production",status:"Release"},"ready to schedule":{group:"production",status:"Ready to Schedule"},"staged":{group:"production",status:"Staged"},"pre staged":{group:"production",status:"Pre Staged"},"pre-staged":{group:"production",status:"Pre Staged"},"devops":{group:"nextup",status:null},"up next":{group:"nextup",status:null},"up next for uat":{group:"nextup",status:null},"uat":{group:"nextup",status:null},"remaining":{group:"remaining",status:null},"development":{group:"remaining",status:null},"in development":{group:"remaining",status:null},"milestones":{group:"milestones",status:null}};
 var INCLUDE_COMPLETED={production:true,nextup:true};
-var STATUS_META={"Live":{bg:"#d1fae5",text:"#065f46",border:"#6ee7b7",dot:"#10b981"},"Scheduled":{bg:"#dbeafe",text:"#1e40af",border:"#93c5fd",dot:"#3b82f6"},"In Progress":{bg:"#e0f2fe",text:"#0c4a6e",border:"#7dd3fc",dot:"#0ea5e9"},"Release":{bg:"#fce7f3",text:"#9d174d",border:"#f9a8d4",dot:"#ec4899"},"Ready to Schedule":{bg:"#cffafe",text:"#155e75",border:"#67e8f9",dot:"#06b6d4"},"Staged":{bg:"#ede9fe",text:"#4c1d95",border:"#c4b5fd",dot:"#8b5cf6"},"Pre Staged":{bg:"#fef3c7",text:"#92400e",border:"#fcd34d",dot:"#f59e0b"}};
-var PRIMARY_STATUSES=["Live","Scheduled","In Progress"],SECONDARY_STATUSES=["Ready to Schedule","Staged","Pre Staged"],STATUS_ORDER=["Live","Scheduled","In Progress","Release","Ready to Schedule","Staged","Pre Staged"];
-var GROUP_COLORS={production:"#4338ca",nextup:"#f97316",remaining:"#64748b"},GROUP_TITLES={production:"Production",nextup:"Next Up",remaining:"Remaining"};
+var STATUS_META={"Live":{bg:"#d1fae5",text:"#065f46",border:"#6ee7b7",dot:"#10b981"},"Scheduled":{bg:"#dbeafe",text:"#1e40af",border:"#93c5fd",dot:"#3b82f6"},"In Progress":{bg:"#e0f2fe",text:"#0c4a6e",border:"#7dd3fc",dot:"#0ea5e9"},"Release":{bg:"#fce7f3",text:"#9d174d",border:"#f9a8d4",dot:"#ec4899"},"UAT":{bg:"#fff7ed",text:"#9a3412",border:"#fdba74",dot:"#f97316"},"Ready to Schedule":{bg:"#cffafe",text:"#155e75",border:"#67e8f9",dot:"#06b6d4"},"Staged":{bg:"#ede9fe",text:"#4c1d95",border:"#c4b5fd",dot:"#8b5cf6"},"Pre Staged":{bg:"#fef3c7",text:"#92400e",border:"#fcd34d",dot:"#f59e0b"}};
+var PRIMARY_STATUSES=["Live","Scheduled","In Progress"],SECONDARY_STATUSES=["Ready to Schedule","Staged","Pre Staged"],STATUS_ORDER=["Live","Scheduled","In Progress","Release","UAT","Ready to Schedule","Staged","Pre Staged"];
+var GROUP_COLORS={production:"#4338ca",nextup:"#f97316",remaining:"#64748b"},GROUP_TITLES={production:"Production",nextup:"Up Next for UAT / Production Release",remaining:"Remaining"};
 var allItems=[],milestoneItems=[],activeTab="production",refreshTimer=null,msChart=null;
 var sortState={production:{col:"name",dir:1},nextup:{col:"name",dir:1},remaining:{col:"name",dir:1}};
 function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
@@ -117,6 +118,19 @@ function fmtDate(d){try{return new Date(d+"T00:00:00").toLocaleDateString("en-US
 function cleanNote(r){if(!r)return"";var s=r.split("\n")[0].slice(0,80).trim();if(!s||s==="[no value]"||s==="null")return"";return s;}
 function parseGoal(n){var m=n.match(/\((\d+)\)\s*$/);return m?parseInt(m[1],10):null;}
 function stripGoal(n){return n.replace(/\s*\(\d+\)\s*$/,"").trim();}
+
+// ── Derive UAT / Release status from task description ──────────────────────
+function deriveNextupStatus(notes){
+  if(!notes)return null;
+  var n=notes.toLowerCase();
+  // Check for "production release" or "prod release" before plain "release"
+  if(n.indexOf("production release")>=0||n.indexOf("prod release")>=0)return"Release";
+  if(n.indexOf("release")>=0)return"Release";
+  if(n.indexOf("uat")>=0)return"UAT";
+  return null;
+}
+// ───────────────────────────────────────────────────────────────────────────
+
 function statusBadge(s){if(!s)return"<span style='color:#d1d5db;font-size:.9rem'>-</span>";var m=STATUS_META[s];if(!m)return"<span>"+esc(s)+"</span>";return"<span class='sbadge' style='background:"+m.bg+";color:"+m.text+";border-color:"+m.border+"'><span class='dot' style='background:"+m.dot+"'></span>"+s+"</span>";}
 function showError(msg){document.getElementById("error-area").innerHTML="<div class='error-box'>&#x274C; "+esc(msg)+"</div>";}
 function clearError(){document.getElementById("error-area").innerHTML="";}
@@ -141,7 +155,6 @@ function loadData(){
   document.getElementById("btn-excel").style.display="none";
   document.getElementById("total-badge").style.display="none";
 
-  // Step 1: fetch custom fields to find GitHub Issue GID
   apiFetch(ASANA_BASE+"/projects/"+PROJECT_GID+"/custom_field_settings?opt_fields=custom_field.gid,custom_field.name&limit=100")
   .then(function(cf){
     var fields=cf.data||[];
@@ -152,7 +165,6 @@ function loadData(){
   })
   .catch(function(){GITHUB_FIELD_GID=null;})
   .then(function(){
-    // Step 2: fetch sections
     return apiFetch(ASANA_BASE+"/projects/"+PROJECT_GID+"/sections?opt_fields=gid,name&limit=100");
   })
   .then(function(json){
@@ -183,7 +195,15 @@ function loadData(){
           if(t.completed&&!inf.keepCompleted)continue;
           var githubUrl="";
           if(GITHUB_FIELD_GID&&t.custom_fields){for(var cf=0;cf<t.custom_fields.length;cf++){if(t.custom_fields[cf].gid===GITHUB_FIELD_GID){githubUrl=t.custom_fields[cf].text_value||t.custom_fields[cf].url_value||t.custom_fields[cf].display_value||"";break;}}}
-          allItems.push({gid:t.gid,name:t.name,group:inf.group,status:inf.status,section:inf.raw,date:t.due_on||"",assignee:(t.assignee&&t.assignee.name)?t.assignee.name:"",note:cleanNote(t.notes),completed:t.completed||false,githubUrl:githubUrl});
+
+          // ── Derive status for nextup items from the task description ──
+          var derivedStatus = inf.status;
+          if(inf.group==="nextup"){
+            derivedStatus = deriveNextupStatus(t.notes) || null;
+          }
+          // ──────────────────────────────────────────────────────────────
+
+          allItems.push({gid:t.gid,name:t.name,group:inf.group,status:derivedStatus,section:inf.raw,date:t.due_on||"",assignee:(t.assignee&&t.assignee.name)?t.assignee.name:"",note:cleanNote(t.notes),completed:t.completed||false,githubUrl:githubUrl});
           loaded++;
         }
         return loadNext(idx+1);
@@ -205,21 +225,23 @@ function byGroup(g){return allItems.filter(function(it){return it.group===g;});}
 function renderGroup(g){
   var search=document.getElementById("search-input").value.toLowerCase(),sf=document.getElementById("status-filter").value,items=byGroup(g);
   if(search)items=items.filter(function(it){return it.name.toLowerCase().indexOf(search)>=0;});
-  if(sf&&g==="production")items=items.filter(function(it){return it.status===sf;});
+  if(sf)items=items.filter(function(it){return it.status===sf;});
   var ss=sortState[g];
   items.sort(function(a,b){var av,bv;if(ss.col==="name"){av=a.name.toLowerCase();bv=b.name.toLowerCase();}else if(ss.col==="status"){av=STATUS_ORDER.indexOf(a.status);bv=STATUS_ORDER.indexOf(b.status);if(av<0)av=99;if(bv<0)bv=99;return(av-bv)*ss.dir;}else if(ss.col==="date"){av=a.date||"";bv=b.date||"";}else{av=a.name.toLowerCase();bv=b.name.toLowerCase();}if(av<bv)return-1*ss.dir;if(av>bv)return 1*ss.dir;return 0;});
   function thHtml(col,label){var active=ss.col===col,icon=active?(ss.dir===1?"&#9650;":"&#9660;"):"&#9650;";return"<th class='"+(active?"sorted":"")+"' onclick='sortBy(\""+g+"\",\""+col+"\")'>"+label+" <span class='sort-icon'>"+icon+"</span></th>";}
   var simplified=(g==="remaining"),hdr;
   if(simplified){hdr=thHtml("name","Customer / Utility")+thHtml("section","Section");}
-  else{hdr=thHtml("name","Customer / Utility")+thHtml("status","Status")+thHtml("date","Due Date");}
+  else{hdr=thHtml("name","Customer / Utility")+thHtml("status","Status")+thHtml("date","Release Date");}
   var rows="";
   for(var i=0;i<items.length;i++){
     var it=items[i],dim=it.completed?"opacity:0.55;":"";
     var nameHtml=it.githubUrl?"<a href='"+esc(it.githubUrl)+"' target='_blank' style='color:#1d4ed8;text-decoration:underline;font-weight:500'>"+esc(it.name)+"</a>":"<span style='font-weight:500'>"+esc(it.name)+"</span>";
+    var noteHtml=it.note?"<div style='font-size:0.78rem;color:#9ca3af;margin-top:2px'>"+esc(it.note)+"</div>":"";
     if(simplified){rows+="<tr><td style='"+dim+"'>"+nameHtml+"</td><td style='color:#6b7280'>"+esc(it.section)+"</td></tr>";}
-    else{rows+="<tr><td style='max-width:340px;"+dim+"'>"+nameHtml+"</td><td>"+statusBadge(it.status)+"</td><td style='color:#1d4ed8;font-weight:600'>"+(it.date?fmtDate(it.date):"<span style='color:#d1d5db'>-</span>")+"</td></tr>";}
+    else{rows+="<tr><td style='max-width:340px;"+dim+"'>"+nameHtml+noteHtml+"</td><td>"+statusBadge(it.status)+"</td><td style='color:#1d4ed8;font-weight:600'>"+(it.date?fmtDate(it.date):"<span style='color:#d1d5db'>-</span>")+"</td></tr>";}
   }
-  document.getElementById("pane-"+g).innerHTML="<div class='group-hdr' style='background:"+GROUP_COLORS[g]+"'><span class='gtitle'>"+GROUP_TITLES[g]+"<span class='gcnt'>"+items.length+"</span></span></div><div class='tbl-wrap'>"+(items.length===0?"<p class='empty'>No items match your filter.</p>":"<table><thead><tr>"+hdr+"</tr></thead><tbody>"+rows+"</tbody></table>")+"</div>";
+  var title = g==="nextup" ? "Up Next for UAT / Production Release" : GROUP_TITLES[g];
+  document.getElementById("pane-"+g).innerHTML="<div class='group-hdr' style='background:"+GROUP_COLORS[g]+"'><span class='gtitle'>"+title+"<span class='gcnt'>"+items.length+"</span></span></div><div class='tbl-wrap'>"+(items.length===0?"<p class='empty'>No items match your filter.</p>":"<table><thead><tr>"+hdr+"</tr></thead><tbody>"+rows+"</tbody></table>")+"</div>";
 }
 function exportExcel(){if(!allItems.length){alert("Load the dashboard first.");return;}try{var wb=XLSX.utils.book_new();[{key:"production",label:"Production"},{key:"nextup",label:"Next Up"},{key:"remaining",label:"Remaining"}].forEach(function(sh){var rows=byGroup(sh.key).map(function(it){return{"Customer / Utility":it.name,"Status":it.status||"","Section":it.section,"Due Date":it.date||"","GitHub Issue":it.githubUrl||"","Completed":it.completed?"Yes":"No"};});var ws=XLSX.utils.json_to_sheet(rows);ws["!cols"]=[{wch:45},{wch:20},{wch:25},{wch:14},{wch:40},{wch:10}];XLSX.utils.book_append_sheet(wb,ws,sh.label);});var msRows=milestoneItems.map(function(m){return{"Milestone":stripGoal(m.name),"Goal":m.goal||"","Completed":m.doneSubs,"Remaining":m.remaining!==null?m.remaining:"","Due Date":m.due||"","Status":m.status};});var msWs=XLSX.utils.json_to_sheet(msRows);msWs["!cols"]=[{wch:45},{wch:8},{wch:10},{wch:10},{wch:14},{wch:12}];XLSX.utils.book_append_sheet(wb,msWs,"Milestones");XLSX.writeFile(wb,"CIS-Installs-Tracker.xlsx");}catch(e){alert("Export failed: "+e.message);}}
 </script>
