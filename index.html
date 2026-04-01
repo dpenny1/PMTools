@@ -96,12 +96,11 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
   <div class="vault-bar">
     <div class="vault-bar-top">
       <div class="vault-bar-title">
-        <span id="vaultIcon">&#x1F512;</span> Token Vault
+        <span id="vaultIcon" onclick="toggleVaultWidget()" style="cursor:pointer;font-size:1.1rem" title="Click to unlock vault">&#x1F512;</span> Token Vault
         <span class="vault-status-text" id="vaultStatusText">Unlock to load your Asana token</span>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <div class="active-tokens" id="activeTokensBar" style="display:none"></div>
-        <button class="btn-sm" id="vaultToggleBtn" onclick="toggleVaultWidget()">Unlock Vault</button>
         <button class="btn-sm" id="vaultLockBtn" style="display:none;border-color:#fca5a5;color:#dc2626" onclick="lockVaultWidget()">&#x1F512; Lock</button>
       </div>
     </div>
