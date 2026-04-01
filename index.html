@@ -432,18 +432,7 @@ var Vault = (function(){
   return pub;
 })();
 
-/* Show hint on load if vault has entries */
-window.addEventListener("load", function(){
-  try{
-    var entries=JSON.parse(localStorage.getItem(VAULT_KEY)||"[]");
-    if(entries.length){
-      document.getElementById("vault-status-bar").innerHTML=
-        "&#x1F512; "+entries.length+" token(s) in vault — click <b>🔒 Vault</b> and enter your master password.";
-    }
-  }catch(e){}
-  var s=sessionStorage.getItem("asana_token_hub");
-  if(s){ document.getElementById("token-input").value=s; loadAll(); }
-});
+
 </script>
 
 <!-- ══════════════════════════════════════
