@@ -13,42 +13,25 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
 .header-sub{color:#a5b4fc;font-size:0.85rem;margin-top:8px}
 .main{max-width:1100px;margin:-32px auto 0;padding:0 16px 48px}
 
-/* ── Token bar ── */
-.token-bar{background:white;border:1px solid #e5e7eb;border-radius:14px;padding:20px 24px;margin-bottom:28px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
-.token-bar label{font-size:15px;font-weight:600;display:block;margin-bottom:8px;color:#374151}
-.token-row{display:flex;gap:10px;flex-wrap:wrap}
-.token-row input{flex:1;min-width:220px;padding:11px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:monospace;outline:none}
-.token-hint{font-size:13px;color:#9ca3af;margin-top:6px}
-.btn-primary{background:#4338ca;color:white;border:none;border-radius:8px;padding:11px 22px;font-size:15px;font-weight:700;cursor:pointer}
+/* ── Vault bar (matches Triage Hub style) ── */
+.vault-bar{background:#fff;border:1px solid #e0e7ff;border-radius:14px;padding:18px 24px;margin-bottom:28px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.vault-bar-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.vault-bar-title{font-size:13px;font-weight:700;color:#1e1b4b;display:flex;align-items:center;gap:7px}
+.vault-status-text{font-size:12px;color:#6b7280}
+.vault-body{margin-top:14px;display:none}
+.pw-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pw-row input{flex:1;min-width:180px;padding:9px 13px;border:1px solid #c7d2fe;border-radius:8px;font-size:13px;outline:none}
+.pw-row input:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.1)}
+.err-msg{font-size:12px;color:#dc2626;margin-top:5px;min-height:16px}
+.hint{font-size:12px;color:#9ca3af;margin-top:4px}
+.active-tokens{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.at-chip{display:inline-flex;align-items:center;gap:5px;background:#e0fdf4;border:1px solid #6ee7b7;border-radius:7px;padding:4px 10px;font-size:12px;font-weight:600;color:#065f46}
+.at-chip button{background:none;border:none;cursor:pointer;font-size:11px;color:#059669;padding:0;line-height:1}
+.at-chip button:hover{color:#dc2626}
+.btn-primary{background:#4338ca;color:white;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer}
 .btn-primary:hover{background:#3730a3}
-.btn-primary:disabled{background:#a5b4fc;cursor:not-allowed}
-.btn-vault-icon{background:none;border:none;cursor:pointer;font-size:1rem;padding:0 0 0 6px;vertical-align:middle;opacity:0.7;line-height:1}
-.btn-vault-icon:hover{opacity:1}
-
-/* ── Vault modal ── */
-.vault-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center}
-.vault-modal-bg.open{display:flex}
-.vault-modal{background:white;border-radius:16px;padding:28px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative}
-.vault-modal h3{font-size:1.1rem;font-weight:700;color:#1e1b4b;margin-bottom:4px}
-.vault-modal .vm-sub{font-size:13px;color:#6b7280;margin-bottom:20px}
-.vm-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9ca3af;line-height:1}
-.vm-close:hover{color:#374151}
-.vm-field{margin-bottom:14px}
-.vm-field label{font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:5px}
-.vm-field input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:monospace}
-.vm-field input:focus{border-color:#a5b4fc}
-.vm-actions{display:flex;gap:8px;margin-top:18px}
-.vm-btn{flex:1;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;border:none}
-.vm-btn.primary{background:#4338ca;color:white}
-.vm-btn.primary:hover{background:#3730a3}
-.vm-btn.secondary{background:#f3f4f6;color:#374151;border:1px solid #e5e7eb}
-.vm-btn.secondary:hover{background:#e5e7eb}
-.vm-msg{font-size:13px;min-height:18px;margin-top:10px;text-align:center}
-.vm-msg.ok{color:#059669}.vm-msg.err{color:#dc2626}
-.vm-divider{border-top:1px solid #f3f4f6;margin:16px 0}
-/* vault status badge in token bar */
-.vault-status{font-size:12px;color:#6b7280;display:flex;align-items:center;gap:5px;margin-top:7px}
-.vault-status.saved{color:#059669}
+.btn-sm{padding:6px 12px;font-size:12px;border:1px solid #d1d5db;background:#fff;color:#374151;border-radius:7px;cursor:pointer;font-weight:600}
+.btn-sm:hover{background:#f9fafb}
 
 /* ── Dashboard cards ── */
 .checklist-card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:20px}
@@ -105,77 +88,37 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
 
 <div class="main">
 
-  <!-- ── Token bar (original) ── -->
-  <div class="token-bar">
-    <label>Asana Personal Access Token <button class="btn-vault-icon" onclick="Vault.openModal()" title="Open Token Vault">&#x1F512;</button></label>
-    <div class="token-row">
-      <input type="password" id="token-input" placeholder="Paste your Asana Personal Access Token here..." onkeydown="if(event.key==='Enter')loadAll()"/>
-      <button class="btn-primary" id="btn-load" onclick="loadAll()">&#x25B6; Load All Projects</button>
+  <!-- ── Vault Bar (matches Triage Hub style) ── -->
+  <div class="vault-bar">
+    <div class="vault-bar-top">
+      <div class="vault-bar-title">
+        <span id="vaultIcon">🔒</span> Token Vault
+        <span class="vault-status-text" id="vaultStatusText">Unlock to load your Asana token</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="active-tokens" id="activeTokensBar" style="display:none"></div>
+        <button class="btn-sm" id="vaultToggleBtn" onclick="toggleVaultWidget()">Unlock Vault</button>
+        <button class="btn-sm" id="vaultLockBtn" style="display:none;border-color:#fca5a5;color:#dc2626" onclick="lockVaultWidget()">🔒 Lock</button>
+      </div>
     </div>
-    <div id="vault-status-bar" class="vault-status"></div>
-  </div>
-
-  <!-- ── Vault modal ── -->
-  <div class="vault-modal-bg" id="vault-modal-bg" onclick="if(event.target===this)Vault.closeModal()">
-    <div class="vault-modal">
-      <button class="vm-close" onclick="Vault.closeModal()">&#x2715;</button>
-      <h3>&#x1F512; Token Vault</h3>
-      <p class="vm-sub" id="vm-sub">AES-256 encrypted token storage — unlock once per session.</p>
-
-      <!-- Panel: unlock (first thing shown if vault exists) -->
-      <div id="vm-panel-unlock">
-        <div class="vm-field">
-          <label>Master password</label>
-          <input type="password" id="vm-unlock-pw" placeholder="Enter master password..." onkeydown="if(event.key==='Enter')Vault.unlock()"/>
+    <div class="vault-body" id="vaultBody">
+      <!-- Locked -->
+      <div id="vaultLockForm">
+        <div class="pw-row">
+          <input type="password" id="vaultPwInput" placeholder="Master password..." autocomplete="new-password" onkeydown="if(event.key==='Enter')unlockVault()"/>
+          <button class="btn-primary" onclick="unlockVault()">Unlock</button>
         </div>
-        <div class="vm-actions">
-          <button class="vm-btn secondary" onclick="Vault.resetVault()">&#x1F5D1; Clear Vault</button>
-          <button class="vm-btn primary" onclick="Vault.unlock()">&#x1F513; Unlock</button>
-        </div>
-        <p id="vm-unlock-msg" class="vm-msg"></p>
-        <p style="font-size:12px;color:#9ca3af;margin-top:10px">No vault yet? Unlock with any password to create one.</p>
+        <div class="err-msg" id="vaultPwErr"></div>
+        <div class="hint">Tokens saved in your vault are available here.</div>
       </div>
-
-      <!-- Panel: unlocked → select + manage -->
-      <div id="vm-panel-manage" style="display:none">
-
-        <!-- Select a token -->
-        <div class="vm-field">
-          <label>Select saved token</label>
-          <div style="display:flex;gap:8px">
-            <select id="vm-select" style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none">
-              <option value="">— choose a token —</option>
-            </select>
-            <button class="vm-btn primary" onclick="Vault.useSelected()">&#x25B6; Use</button>
-          </div>
-        </div>
-
-        <div class="vm-divider"></div>
-
-        <!-- Add new token -->
-        <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:8px">&#xFF0B; Add / Edit Token</div>
-        <div class="vm-field">
-          <label>Token name</label>
-          <input type="text" id="vm-add-name" placeholder="e.g. Production, My Token…"/>
-        </div>
-        <div class="vm-field">
-          <label>Token value</label>
-          <input type="password" id="vm-add-tok" placeholder="Paste Asana personal access token" onkeydown="if(event.key==='Enter')Vault.addToken()"/>
-        </div>
-        <div class="vm-actions">
-          <button class="vm-btn secondary" onclick="Vault.deleteSelected()">&#x1F5D1; Delete Selected</button>
-          <button class="vm-btn primary" onclick="Vault.addToken()">&#x1F4BE; Save Token</button>
-        </div>
-        <p id="vm-manage-msg" class="vm-msg"></p>
-
-        <!-- Saved tokens list -->
-        <div class="vm-divider"></div>
-        <div id="vm-token-list" style="font-size:13px;color:#6b7280"></div>
-
+      <!-- Unlocked -->
+      <div id="vaultUnlockedPanel" style="display:none">
+        <div id="vaultTokenList"></div>
       </div>
-
     </div>
   </div>
+
+  <!-- ── Vault modal removed — vault bar handles everything ── -->
 
   <!-- ── Dashboard cards (unchanged) ── -->
   <div class="checklist-card">
