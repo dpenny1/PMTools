@@ -307,7 +307,7 @@ function lockVaultWidget(){
 }
 
 function renderVaultTokenList(){
-  var tokens=Vault.list().filter(function(t){return t.type==='asana';});
+  var tokens=Vault.list().filter(function(t){return t.type&&t.type.toLowerCase()==='asana';});
   var activeName=sessionStorage.getItem('cv_session_asana_name')||null;
   var el=document.getElementById('vaultTokenList');
   if(!tokens.length){el.innerHTML='<div style="font-size:13px;color:#9ca3af;padding:4px 0">No Asana tokens found. Add one from the Triage Hub vault.</div>';return;}
