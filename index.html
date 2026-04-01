@@ -268,7 +268,6 @@ function toggleVaultWidget(){
   var body=document.getElementById('vaultBody');
   var open=body.style.display==='block';
   body.style.display=open?'none':'block';
-  document.getElementById('vaultToggleBtn').textContent=open?'Unlock Vault':'Hide';
 }
 
 async function unlockVault(){
@@ -281,7 +280,6 @@ async function unlockVault(){
     document.getElementById('vaultLockForm').style.display='none';
     document.getElementById('vaultUnlockedPanel').style.display='block';
     document.getElementById('vaultLockBtn').style.display='inline-flex';
-    document.getElementById('vaultToggleBtn').textContent='Hide';
     document.getElementById('vaultIcon').textContent='🔓';
     document.getElementById('vaultStatusText').textContent='Vault unlocked — select your Asana token below';
     renderVaultTokenList();
@@ -299,7 +297,6 @@ function lockVaultWidget(){
   document.getElementById('vaultUnlockedPanel').style.display='none';
   document.getElementById('vaultLockBtn').style.display='none';
   document.getElementById('vaultBody').style.display='none';
-  document.getElementById('vaultToggleBtn').textContent='Unlock Vault';
   document.getElementById('vaultIcon').textContent='🔒';
   document.getElementById('vaultStatusText').textContent='Unlock to load your Asana token';
   document.getElementById('vaultPwInput').value='';
