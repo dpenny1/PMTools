@@ -114,20 +114,44 @@ var GROUP_COLORS={production:"#4338ca",nextup:"#f97316",remaining:"#64748b"},GRO
 var allItems=[],milestoneItems=[],activeTab="production",refreshTimer=null,msChart=null;
 var sortState={production:{col:"name",dir:1},nextup:{col:"name",dir:1},remaining:{col:"name",dir:1}};
 function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function fmtDate(d){try{return new Date(d+"T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}catch(e){return d;}}
+function fmtDate(d){
+  if(!d)return"";
+  try{
+    // Handle M/D/YYYY from description
+    if(d.indexOf("/")>=0){
+      var p=d.split("/");
+      return new Date(parseInt(p[2]),parseInt(p[0])-1,parseInt(p[1])).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+    }
+    return new Date(d+"T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+  }catch(e){return d;}
+}
 function cleanNote(r){if(!r)return"";var s=r.split("\n")[0].slice(0,80).trim();if(!s||s==="[no value]"||s==="null")return"";return s;}
 function parseGoal(n){var m=n.match(/\((\d+)\)\s*$/);return m?parseInt(m[1],10):null;}
 function stripGoal(n){return n.replace(/\s*\(\d+\)\s*$/,"").trim();}
 
-// ── Derive UAT / Release status from task description ──────────────────────
+// ── Derive UAT / Release status AND date from task description ──────────────
 function deriveNextupStatus(notes){
-  if(!notes)return null;
+  if(!notes)return{status:null,date:""};
   var n=notes.toLowerCase();
-  // Check for "production release" or "prod release" before plain "release"
-  if(n.indexOf("production release")>=0||n.indexOf("prod release")>=0)return"Release";
-  if(n.indexOf("release")>=0)return"Release";
-  if(n.indexOf("uat")>=0)return"UAT";
-  return null;
+  var dateRe=/(\d{1,2}\/\d{1,2}\/\d{4})/;
+  // Check Production first (before plain "release")
+  var prodMatch=notes.match(/production\s+(\d{1,2}\/\d{1,2}\/\d{4})/i);
+  if(prodMatch)return{status:"Release",date:prodMatch[1]};
+  if(n.indexOf("production release")>=0||n.indexOf("prod release")>=0||n.indexOf("production")>=0){
+    var m=notes.match(dateRe);
+    return{status:"Release",date:m?m[1]:""};
+  }
+  var uatMatch=notes.match(/uat\s+(\d{1,2}\/\d{1,2}\/\d{4})/i);
+  if(uatMatch)return{status:"UAT",date:uatMatch[1]};
+  if(n.indexOf("uat")>=0){
+    var m=notes.match(dateRe);
+    return{status:"UAT",date:m?m[1]:""};
+  }
+  if(n.indexOf("release")>=0){
+    var m=notes.match(dateRe);
+    return{status:"Release",date:m?m[1]:""};
+  }
+  return{status:null,date:""};
 }
 // ───────────────────────────────────────────────────────────────────────────
 
@@ -198,12 +222,15 @@ function loadData(){
 
           // ── Derive status for nextup items from the task description ──
           var derivedStatus = inf.status;
+          var derivedDate = t.due_on||"";
           if(inf.group==="nextup"){
-            derivedStatus = deriveNextupStatus(t.notes) || null;
+            var derived = deriveNextupStatus(t.notes);
+            derivedStatus = derived.status || null;
+            if(derived.date) derivedDate = derived.date;
           }
           // ──────────────────────────────────────────────────────────────
 
-          allItems.push({gid:t.gid,name:t.name,group:inf.group,status:derivedStatus,section:inf.raw,date:t.due_on||"",assignee:(t.assignee&&t.assignee.name)?t.assignee.name:"",note:cleanNote(t.notes),completed:t.completed||false,githubUrl:githubUrl});
+          allItems.push({gid:t.gid,name:t.name,group:inf.group,status:derivedStatus,section:inf.raw,date:derivedDate,assignee:(t.assignee&&t.assignee.name)?t.assignee.name:"",note:cleanNote(t.notes),completed:t.completed||false,githubUrl:githubUrl});
           loaded++;
         }
         return loadNext(idx+1);
