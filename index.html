@@ -1,647 +1,260 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CentralView ERP Install Hub</title>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CIS Installs</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1f5f9;color:#1a1a1a;min-height:100vh;font-size:16px}
-.header{background:linear-gradient(135deg,#1e1b4b 0%,#4338ca 60%,#6366f1 100%);padding:48px 24px 64px;text-align:center}
-.header h1{color:white;font-size:2rem;font-weight:800;margin-bottom:10px;letter-spacing:-0.5px}
-.header p{color:#c7d2fe;font-size:1rem}
-.header-sub{color:#a5b4fc;font-size:0.85rem;margin-top:8px}
-.main{max-width:1100px;margin:-32px auto 0;padding:0 16px 48px}
-
-/* ── Token bar ── */
-.token-bar{background:white;border:1px solid #e5e7eb;border-radius:14px;padding:20px 24px;margin-bottom:28px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
-.token-bar label{font-size:15px;font-weight:600;display:block;margin-bottom:8px;color:#374151}
-.token-row{display:flex;gap:10px;flex-wrap:wrap}
-.token-row input{flex:1;min-width:220px;padding:11px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:monospace;outline:none}
-.token-hint{font-size:13px;color:#9ca3af;margin-top:6px}
-.btn-primary{background:#4338ca;color:white;border:none;border-radius:8px;padding:11px 22px;font-size:15px;font-weight:700;cursor:pointer}
-.btn-primary:hover{background:#3730a3}
-.btn-primary:disabled{background:#a5b4fc;cursor:not-allowed}
-.btn-vault-icon{background:none;border:none;cursor:pointer;font-size:1rem;padding:0 0 0 6px;vertical-align:middle;opacity:0.7;line-height:1}
-.btn-vault-icon:hover{opacity:1}
-
-/* ── Vault modal ── */
-.vault-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center}
-.vault-modal-bg.open{display:flex}
-.vault-modal{background:white;border-radius:16px;padding:28px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative}
-.vault-modal h3{font-size:1.1rem;font-weight:700;color:#1e1b4b;margin-bottom:4px}
-.vault-modal .vm-sub{font-size:13px;color:#6b7280;margin-bottom:20px}
-.vm-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9ca3af;line-height:1}
-.vm-close:hover{color:#374151}
-.vm-field{margin-bottom:14px}
-.vm-field label{font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:5px}
-.vm-field input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:monospace}
-.vm-field input:focus{border-color:#a5b4fc}
-.vm-actions{display:flex;gap:8px;margin-top:18px}
-.vm-btn{flex:1;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;border:none}
-.vm-btn.primary{background:#4338ca;color:white}
-.vm-btn.primary:hover{background:#3730a3}
-.vm-btn.secondary{background:#f3f4f6;color:#374151;border:1px solid #e5e7eb}
-.vm-btn.secondary:hover{background:#e5e7eb}
-.vm-msg{font-size:13px;min-height:18px;margin-top:10px;text-align:center}
-.vm-msg.ok{color:#059669}.vm-msg.err{color:#dc2626}
-.vm-divider{border-top:1px solid #f3f4f6;margin:16px 0}
-/* vault status badge in token bar */
-.vault-status{font-size:12px;color:#6b7280;display:flex;align-items:center;gap:5px;margin-top:7px}
-.vault-status.saved{color:#059669}
-
-/* ── Dashboard cards ── */
-.checklist-card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:20px}
-.checklist-card:hover{box-shadow:0 6px 20px rgba(0,0,0,0.1)}
-.cl-header{padding:22px 24px;background:linear-gradient(135deg,#b45309,#f59e0b);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
-.cl-header-left{display:flex;align-items:center;gap:14px}
-.cl-header h2{color:white;font-size:1.15rem;font-weight:700}
-.cl-header p{color:rgba(255,255,255,0.85);font-size:0.85rem;margin-top:2px}
-.cl-header-icon{font-size:1.8rem;opacity:0.8}
-.cl-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid #f3f4f6}
-.cs{text-align:center;padding:16px 10px}
-.cs .n{font-size:1.8rem;font-weight:800}
-.cs .l{font-size:0.8rem;font-weight:600;color:#6b7280;margin-top:2px}
-.cl-body{display:grid;grid-template-columns:1fr 1fr;gap:0}
-.cl-list-col{padding:14px 20px;border-right:1px solid #f3f4f6;max-height:160px;overflow-y:auto}
-.cl-list-col:last-child{border-right:none}
-.cl-col-label{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-bottom:8px}
-.cl-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f9fafb;font-size:0.875rem}
-.cl-row:last-child{border-bottom:none}
-.cl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.cl-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#374151;font-weight:500}
-.cl-days{font-size:0.78rem;font-weight:700;white-space:nowrap}
-.cl-footer{padding:14px 20px;border-top:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between}
-.last-updated{font-size:0.8rem;color:#9ca3af}
-.launch-btn-sm{background:#fef3c7;border:1px solid #fde68a;color:#92400e;border-radius:8px;padding:9px 20px;font-size:0.9rem;font-weight:700;text-decoration:none;transition:background 0.1s}
-.launch-btn-sm:hover{background:#fde68a}
-.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
-.card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);transition:transform 0.15s,box-shadow 0.15s}
-.card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.12)}
-.card-header{padding:22px 20px 16px;position:relative}
-.card-header h2{color:white;font-size:1.1rem;font-weight:700;margin-bottom:4px}
-.card-header p{color:rgba(255,255,255,0.8);font-size:0.82rem}
-.card-icon{position:absolute;top:18px;right:18px;font-size:1.8rem;opacity:0.7}
-.card-stats{padding:16px 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border-bottom:1px solid #f3f4f6}
-.card-body{padding:16px 20px 20px}
-.card-mini-stats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;min-height:28px}
-.mini-badge{font-size:0.78rem;font-weight:600;padding:3px 10px;border-radius:999px;border-width:1px;border-style:solid}
-.launch-btn{display:block;width:100%;text-align:center;padding:11px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;font-size:0.95rem;font-weight:700;color:#374151;text-decoration:none;transition:background 0.1s}
-.launch-btn:hover{background:#f1f5f9}
-.loading-card{font-size:0.875rem;color:#9ca3af}
-.spin{display:inline-block;width:13px;height:13px;border:2px solid #e5e7eb;border-top-color:#6366f1;border-radius:50%;animation:spin .7s linear infinite;margin-right:5px;vertical-align:middle}
+body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f9fafb;color:#1a1a1a;min-height:100vh;font-size:16px}
+.header{background:#4338ca;padding:16px 24px;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.header h1{color:white;font-weight:700;font-size:1.3rem;margin:0}
+.header p{color:#c7d2fe;font-size:0.85rem;margin-top:2px}
+.header-btns{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.badge-white{background:rgba(255,255,255,0.2);color:white;font-size:0.9rem;padding:4px 14px;border-radius:999px;font-weight:600}
+.back-btn{background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:7px 16px;font-size:0.9rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.back-btn:hover{background:rgba(255,255,255,0.25)}
+.btn{border:none;border-radius:8px;padding:8px 16px;font-size:0.9rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn-refresh{background:white;color:#4338ca}.btn-refresh:hover{background:#e0e7ff}
+.btn-excel{background:#16a34a;color:white}.btn-excel:hover{background:#15803d}
+.main{max-width:1200px;margin:0 auto;padding:24px 16px}
+.error-box{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px;color:#991b1b;font-size:1rem;margin-bottom:16px}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px}
+.stats-row2{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.stat-p{border-radius:10px;padding:16px;text-align:center;border-width:2px;border-style:solid}
+.stat-p .num{font-size:2.4rem;font-weight:800}.stat-p .lbl{font-size:0.9rem;font-weight:700;margin-top:3px}
+.stat-s{border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:10px;border-width:1px;border-style:solid}
+.stat-s .num{font-size:1.5rem;font-weight:700;min-width:30px;text-align:center}.stat-s .lbl{font-size:0.82rem;font-weight:600}
+.milestone-section{background:white;border:1px solid #e5e7eb;border-radius:12px;padding:20px;margin-bottom:24px}
+.milestone-section h2{font-size:1rem;font-weight:700;margin-bottom:16px;color:#1f2937}
+.chart-wrap{position:relative;height:320px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid #e5e7eb;margin-bottom:20px}
+.tab{padding:11px 22px;font-size:1rem;font-weight:600;border-radius:8px 8px 0 0;border:none;background:transparent;color:#6b7280;cursor:pointer}
+.tab.active{border:1px solid #e5e7eb;border-bottom:1px solid #f9fafb;background:#f9fafb;color:#4338ca;margin-bottom:-1px;position:relative;z-index:1}
+.tab-cnt{margin-left:6px;font-size:0.8rem;padding:1px 8px;border-radius:999px;font-weight:700;background:#f3f4f6;color:#6b7280}
+.tab.active .tab-cnt{background:#e0e7ff;color:#4338ca}
+.search-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:center}
+.search-bar input,.search-bar select{border:1px solid #e5e7eb;border-radius:8px;padding:9px 14px;font-size:0.95rem;background:white;outline:none}
+.group-hdr{border-radius:12px 12px 0 0;padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+.group-hdr .gtitle{font-weight:700;font-size:1.05rem;color:white}
+.gcnt{background:rgba(255,255,255,0.25);color:white;font-size:0.8rem;font-weight:700;padding:2px 10px;border-radius:999px;margin-left:8px}
+.tbl-wrap{border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;overflow:hidden;margin-bottom:32px}
+table{width:100%;border-collapse:collapse;text-align:left}
+thead{background:#f9fafb;border-bottom:1px solid #e5e7eb}
+th{padding:10px 14px;font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;font-weight:600;cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{background:#f0f0f0;color:#374151}
+th .sort-icon{margin-left:4px;opacity:0.4;font-size:0.7rem}
+th.sorted .sort-icon{opacity:1;color:#4338ca}
+td{padding:9px 14px;border-bottom:1px solid #f3f4f6;font-size:0.95rem;vertical-align:middle}
+tr:last-child td{border-bottom:none}tr:hover td{background:#f9fafb}
+.sbadge{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:999px;font-size:0.82rem;font-weight:600;border-width:1px;border-style:solid}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.empty{text-align:center;color:#9ca3af;font-size:1rem;padding:32px}
+.loading{text-align:center;padding:48px;color:#6b7280;font-size:1rem}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid #c7d2fe;border-top-color:#4338ca;border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
-.error-small{color:#dc2626;font-size:0.875rem}
-.card-last-updated{font-size:0.78rem;color:#9ca3af;text-align:center;margin-top:8px}
-@media(max-width:760px){.cards{grid-template-columns:1fr}.cl-body{grid-template-columns:1fr}.cl-stats-row{grid-template-columns:repeat(2,1fr)}}
+.footer{text-align:center;font-size:0.82rem;color:#9ca3af;margin-top:28px;padding-bottom:24px}
+@media(max-width:640px){.stats-row{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 <div class="header">
-  <h1>&#x1F4CB; CentralView ERP Install Hub</h1>
-  <p>Live install dashboards for all products — powered by Asana</p>
-  <p class="header-sub">Enter your token once below to load live stats across all projects</p>
+  <div class="header-inner">
+    <div><h1>CIS Installs</h1><p>Production Push &middot; Every 2 Weeks &middot; Live from Asana</p></div>
+    <div class="header-btns">
+      <a class="back-btn" href="index.html">&#8592; CentralView Hub</a>
+      <span class="badge-white" id="total-badge" style="display:none"></span>
+      <span id="last-refresh" style="color:#c7d2fe;font-size:0.85rem"></span>
+      <button class="btn btn-refresh" id="btn-refresh" onclick="loadData()" style="display:none">&#x1F504; Refresh</button>
+      <button class="btn btn-excel" id="btn-excel" onclick="exportExcel()" style="display:none">&#x1F4CA; Export Excel</button>
+    </div>
+  </div>
 </div>
-
 <div class="main">
-
-  <!-- ── Token bar (original) ── -->
-  <div class="token-bar">
-    <label>Asana Personal Access Token <button class="btn-vault-icon" onclick="Vault.openModal()" title="Open Token Vault">&#x1F512;</button></label>
-    <div class="token-row">
-      <input type="password" id="token-input" placeholder="Paste your Asana Personal Access Token here..." onkeydown="if(event.key==='Enter')loadAll()"/>
-      <button class="btn-primary" id="btn-load" onclick="loadAll()">&#x25B6; Load All Projects</button>
+  <div id="error-area"></div>
+  <div id="loading-area"></div>
+  <div id="dashboard" style="display:none">
+    <div class="stats-row" id="primary-stats"></div>
+    <div class="stats-row2" id="secondary-stats"></div>
+    <div class="milestone-section">
+      <h2>&#127937; Milestone Progress</h2>
+      <div class="chart-wrap"><canvas id="ms-chart"></canvas></div>
     </div>
-    <div id="vault-status-bar" class="vault-status"></div>
+    <div class="tabs">
+      <button class="tab active" id="tab-btn-production" onclick="switchTab('production')">Production <span class="tab-cnt" id="cnt-production">0</span></button>
+      <button class="tab" id="tab-btn-nextup" onclick="switchTab('nextup')">Next Up <span class="tab-cnt" id="cnt-nextup">0</span></button>
+      <button class="tab" id="tab-btn-remaining" onclick="switchTab('remaining')">Remaining <span class="tab-cnt" id="cnt-remaining">0</span></button>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="&#x1F50D; Search by name..." oninput="renderActive()" style="width:260px"/>
+      <select id="status-filter" onchange="renderActive()">
+        <option value="">All Statuses</option>
+        <option>Live</option><option>Scheduled</option><option>In Progress</option>
+        <option>Ready to Schedule</option><option>Staged</option><option>Pre Staged</option>
+        <option>UAT</option><option>Release</option>
+      </select>
+      <button onclick="clearFilters()" style="font-size:.9rem;color:#ef4444;background:none;border:none;cursor:pointer;text-decoration:underline">Clear</button>
+    </div>
+    <div id="pane-production"></div>
+    <div id="pane-nextup" style="display:none"></div>
+    <div id="pane-remaining" style="display:none"></div>
   </div>
-
-  <!-- ── Vault modal ── -->
-  <div class="vault-modal-bg" id="vault-modal-bg" onclick="if(event.target===this)Vault.closeModal()">
-    <div class="vault-modal">
-      <button class="vm-close" onclick="Vault.closeModal()">&#x2715;</button>
-      <h3>&#x1F512; Token Vault</h3>
-      <p class="vm-sub" id="vm-sub">AES-256 encrypted token storage — unlock once per session.</p>
-
-      <!-- Panel: unlock (first thing shown if vault exists) -->
-      <div id="vm-panel-unlock">
-        <div class="vm-field">
-          <label>Master password</label>
-          <input type="password" id="vm-unlock-pw" placeholder="Enter master password..." onkeydown="if(event.key==='Enter')Vault.unlock()"/>
-        </div>
-        <div class="vm-actions">
-          <button class="vm-btn secondary" onclick="Vault.resetVault()">&#x1F5D1; Clear Vault</button>
-          <button class="vm-btn primary" onclick="Vault.unlock()">&#x1F513; Unlock</button>
-        </div>
-        <p id="vm-unlock-msg" class="vm-msg"></p>
-        <p style="font-size:12px;color:#9ca3af;margin-top:10px">No vault yet? Unlock with any password to create one.</p>
-      </div>
-
-      <!-- Panel: unlocked → select + manage -->
-      <div id="vm-panel-manage" style="display:none">
-
-        <!-- Select a token -->
-        <div class="vm-field">
-          <label>Select saved token</label>
-          <div style="display:flex;gap:8px">
-            <select id="vm-select" style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none">
-              <option value="">— choose a token —</option>
-            </select>
-            <button class="vm-btn primary" onclick="Vault.useSelected()">&#x25B6; Use</button>
-          </div>
-        </div>
-
-        <div class="vm-divider"></div>
-
-        <!-- Add new token -->
-        <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:8px">&#xFF0B; Add / Edit Token</div>
-        <div class="vm-field">
-          <label>Token name</label>
-          <input type="text" id="vm-add-name" placeholder="e.g. Production, My Token…"/>
-        </div>
-        <div class="vm-field">
-          <label>Token value</label>
-          <input type="password" id="vm-add-tok" placeholder="Paste Asana personal access token" onkeydown="if(event.key==='Enter')Vault.addToken()"/>
-        </div>
-        <div class="vm-actions">
-          <button class="vm-btn secondary" onclick="Vault.deleteSelected()">&#x1F5D1; Delete Selected</button>
-          <button class="vm-btn primary" onclick="Vault.addToken()">&#x1F4BE; Save Token</button>
-        </div>
-        <p id="vm-manage-msg" class="vm-msg"></p>
-
-        <!-- Saved tokens list -->
-        <div class="vm-divider"></div>
-        <div id="vm-token-list" style="font-size:13px;color:#6b7280"></div>
-
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ── Dashboard cards (unchanged) ── -->
-  <div class="checklist-card">
-    <div class="cl-header">
-      <div class="cl-header-left">
-        <span class="cl-header-icon">&#x2705;</span>
-        <div><h2>Installation Checklists</h2><p id="sub-cl">Checklist completion tracker</p></div>
-      </div>
-      <a class="launch-btn-sm" id="cl-launch-btn" href="checklists_tracker.html">Launch Checklists &#8594;</a>
-    </div>
-    <div class="cl-stats-row">
-      <div class="cs"><div class="n" style="color:#ef4444" id="cl-over">-</div><div class="l">Danger (&le;7 days)</div></div>
-      <div class="cs"><div class="n" style="color:#f59e0b" id="cl-warn">-</div><div class="l">At Risk (&le;14 days)</div></div>
-      <div class="cs"><div class="n" style="color:#3b82f6" id="cl-ok">-</div><div class="l">On Track</div></div>
-      <div class="cs"><div class="n" style="color:#10b981" id="cl-complete">-</div><div class="l">Complete</div></div>
-    </div>
-    <div class="cl-body">
-      <div class="cl-list-col">
-        <div class="cl-col-label">&#x1F534; Danger (&le;7d)</div>
-        <div id="cl-overdue-list"><span class="loading-card">Load token to view</span></div>
-      </div>
-      <div class="cl-list-col">
-        <div class="cl-col-label">&#x26A0;&#xFE0F; At Risk (&le;14 days)</div>
-        <div id="cl-atrisk-list"><span class="loading-card">Load token to view</span></div>
-      </div>
-    </div>
-    <div class="cl-footer">
-      <span class="last-updated" id="ts-cl"></span>
-    </div>
-  </div>
-
-  <div class="cards">
-    <div class="card">
-      <div class="card-header" style="background:linear-gradient(135deg,#0f766e,#14b8a6)">
-        <span class="card-icon">&#x1F511;</span>
-        <h2>SSO Installs</h2><p id="sub-sso">Single Sign-On deployment</p>
-      </div>
-      <div class="card-stats">
-        <div class="cs"><div class="n" style="color:#10b981" id="sso-live">-</div><div class="l">Live</div></div>
-        <div class="cs"><div class="n" style="color:#3b82f6" id="sso-sched">-</div><div class="l">Scheduled</div></div>
-        <div class="cs"><div class="n" style="color:#6b7280" id="sso-other">-</div><div class="l">Not Live/Sched</div></div>
-      </div>
-      <div class="card-body">
-        <div class="card-mini-stats" id="mini-sso"><span class="loading-card">Load token to view stats</span></div>
-        <a class="launch-btn" id="sso-launch-btn" href="sso_tracker.html">Launch SSO Dashboard &#8594;</a>
-        <div class="card-last-updated" id="ts-sso"></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header" style="background:linear-gradient(135deg,#4338ca,#6366f1)">
-        <span class="card-icon">&#x1F4E6;</span>
-        <h2>CIS Installs</h2><p id="sub-cis">Core install pipeline</p>
-      </div>
-      <div class="card-stats">
-        <div class="cs"><div class="n" style="color:#10b981" id="cis-live">-</div><div class="l">Live</div></div>
-        <div class="cs"><div class="n" style="color:#3b82f6" id="cis-sched">-</div><div class="l">Scheduled</div></div>
-        <div class="cs"><div class="n" style="color:#6b7280" id="cis-other">-</div><div class="l">Not Live/Sched</div></div>
-      </div>
-      <div class="card-body">
-        <div class="card-mini-stats" id="mini-cis"><span class="loading-card">Load token to view stats</span></div>
-        <a class="launch-btn" id="cis-launch-btn" href="cis_tracker.html">Launch CIS Dashboard &#8594;</a>
-        <div class="card-last-updated" id="ts-cis"></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header" style="background:linear-gradient(135deg,#059669,#10b981)">
-        <span class="card-icon">&#x1F527;</span>
-        <h2>Works Installs</h2><p id="sub-wk">Works deployment</p>
-      </div>
-      <div class="card-stats">
-        <div class="cs"><div class="n" style="color:#10b981" id="wk-live">-</div><div class="l">Live</div></div>
-        <div class="cs"><div class="n" style="color:#3b82f6" id="wk-sched">-</div><div class="l">Scheduled</div></div>
-        <div class="cs"><div class="n" style="color:#6b7280" id="wk-other">-</div><div class="l">Not Live/Sched</div></div>
-      </div>
-      <div class="card-body">
-        <div class="card-mini-stats" id="mini-wk"><span class="loading-card">Load token to view stats</span></div>
-        <a class="launch-btn" id="wk-launch-btn" href="works_tracker.html" target="_blank">Launch Works Dashboard &#8594;</a>
-        <div class="card-last-updated" id="ts-wk"></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">
-        <span class="card-icon">&#x1F50D;</span>
-        <h2>Power Search Installs</h2><p id="sub-ps">Power Search deployment</p>
-      </div>
-      <div class="card-stats">
-        <div class="cs"><div class="n" style="color:#10b981" id="ps-live">-</div><div class="l">Live</div></div>
-        <div class="cs"><div class="n" style="color:#3b82f6" id="ps-sched">-</div><div class="l">Scheduled</div></div>
-        <div class="cs"><div class="n" style="color:#6b7280" id="ps-other">-</div><div class="l">Not Live/Sched</div></div>
-      </div>
-      <div class="card-body">
-        <div class="card-mini-stats" id="mini-ps"><span class="loading-card">Load token to view stats</span></div>
-        <a class="launch-btn" id="ps-launch-btn" href="ps_tracker.html" target="_blank">Launch Power Search Dashboard &#8594;</a>
-        <div class="card-last-updated" id="ts-ps"></div>
-      </div>
-    </div>
-  </div>
-
-  <div style="margin-top:20px">
-    <div class="card" style="max-width:100%">
-      <div class="card-header" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
-        <span class="card-icon">&#x1F4B0;</span>
-        <h2>FIN Installs</h2><p id="sub-fin">Financial install pipeline</p>
-      </div>
-      <div class="card-stats">
-        <div class="cs"><div class="n" style="color:#10b981" id="fin-live">-</div><div class="l">Live</div></div>
-        <div class="cs"><div class="n" style="color:#3b82f6" id="fin-sched">-</div><div class="l">Scheduled</div></div>
-        <div class="cs"><div class="n" style="color:#6b7280" id="fin-other">-</div><div class="l">Not Live/Sched</div></div>
-      </div>
-      <div class="card-body">
-        <div class="card-mini-stats" id="mini-fin"><span class="loading-card">Load token to view stats</span></div>
-        <a class="launch-btn" id="fin-launch-btn" href="fin_tracker.html" target="_blank">Launch FIN Dashboard &#8594;</a>
-        <div class="card-last-updated" id="ts-fin"></div>
-      </div>
-    </div>
-  </div>
+  <p class="footer">Data pulled live from Asana &middot; CIS Installs &middot; Auto-refreshes every 15 minutes</p>
 </div>
-
-<!-- ══════════════════════════════════════
-     VAULT JS
-════════════════════════════════════════ -->
 <script>
-var VAULT_KEY = "cis_vault_v1";
+var PROJECT_GID="1211708203704329",ASANA_BASE="https://app.asana.com/api/1.0";
+var GITHUB_FIELD_GID=null;
+var SECTION_MAP={"live":{group:"production",status:"Live"},"scheduled":{group:"production",status:"Scheduled"},"in progress":{group:"production",status:"In Progress"},"release":{group:"production",status:"Release"},"prod release":{group:"production",status:"Release"},"production release":{group:"production",status:"Release"},"ready to schedule":{group:"production",status:"Ready to Schedule"},"staged":{group:"production",status:"Staged"},"pre staged":{group:"production",status:"Pre Staged"},"pre-staged":{group:"production",status:"Pre Staged"},"devops":{group:"nextup",status:null},"up next":{group:"nextup",status:null},"up next for uat":{group:"nextup",status:null},"uat":{group:"nextup",status:null},"remaining":{group:"remaining",status:null},"development":{group:"remaining",status:null},"in development":{group:"remaining",status:null},"milestones":{group:"milestones",status:null}};
+var INCLUDE_COMPLETED={production:true,nextup:true};
+var STATUS_META={"Live":{bg:"#d1fae5",text:"#065f46",border:"#6ee7b7",dot:"#10b981"},"Scheduled":{bg:"#dbeafe",text:"#1e40af",border:"#93c5fd",dot:"#3b82f6"},"In Progress":{bg:"#e0f2fe",text:"#0c4a6e",border:"#7dd3fc",dot:"#0ea5e9"},"Release":{bg:"#fce7f3",text:"#9d174d",border:"#f9a8d4",dot:"#ec4899"},"UAT":{bg:"#fff7ed",text:"#9a3412",border:"#fdba74",dot:"#f97316"},"Ready to Schedule":{bg:"#cffafe",text:"#155e75",border:"#67e8f9",dot:"#06b6d4"},"Staged":{bg:"#ede9fe",text:"#4c1d95",border:"#c4b5fd",dot:"#8b5cf6"},"Pre Staged":{bg:"#fef3c7",text:"#92400e",border:"#fcd34d",dot:"#f59e0b"}};
+var PRIMARY_STATUSES=["Live","Scheduled","In Progress"],SECONDARY_STATUSES=["Ready to Schedule","Staged","Pre Staged"],STATUS_ORDER=["Live","Scheduled","In Progress","Release","UAT","Ready to Schedule","Staged","Pre Staged"];
+var GROUP_COLORS={production:"#4338ca",nextup:"#f97316",remaining:"#64748b"},GROUP_TITLES={production:"Production",nextup:"Up Next for UAT / Production Release",remaining:"Remaining"};
+var allItems=[],milestoneItems=[],activeTab="production",refreshTimer=null,msChart=null;
+var sortState={production:{col:"name",dir:1},nextup:{col:"name",dir:1},remaining:{col:"name",dir:1}};
+function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function fmtDate(d){try{return new Date(d+"T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}catch(e){return d;}}
+function cleanNote(r){if(!r)return"";var s=r.split("\n")[0].slice(0,80).trim();if(!s||s==="[no value]"||s==="null")return"";return s;}
+function parseGoal(n){var m=n.match(/\((\d+)\)\s*$/);return m?parseInt(m[1],10):null;}
+function stripGoal(n){return n.replace(/\s*\(\d+\)\s*$/,"").trim();}
 
-var Vault = (function(){
-  var _pw = null;        // master password held in memory while unlocked
-  var _entries = [];     // [{name, encrypted}]
-
-  /* ── crypto ── */
-  async function deriveKey(pw, salt){
-    var km = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
-    return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:310000,hash:"SHA-256"}, km, {name:"AES-GCM",length:256}, false, ["encrypt","decrypt"]);
-  }
-  async function encrypt(text, pw){
-    var salt=crypto.getRandomValues(new Uint8Array(16)), iv=crypto.getRandomValues(new Uint8Array(12));
-    var key=await deriveKey(pw,salt);
-    var ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,new TextEncoder().encode(text));
-    var buf=new Uint8Array(28+ct.byteLength);
-    buf.set(salt,0);buf.set(iv,16);buf.set(new Uint8Array(ct),28);
-    return btoa(String.fromCharCode(...buf));
-  }
-  async function decrypt(b64, pw){
-    var buf=Uint8Array.from(atob(b64),function(c){return c.charCodeAt(0);});
-    var key=await deriveKey(pw,buf.slice(0,16));
-    var plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:buf.slice(16,28)},key,buf.slice(28));
-    return new TextDecoder().decode(plain);
-  }
-
-  /* ── localStorage: stores JSON array of {name, encrypted} ── */
-  function loadEntries(){ try{var r=localStorage.getItem(VAULT_KEY);return r?JSON.parse(r):[];}catch(e){return[];} }
-  function saveEntries(){ localStorage.setItem(VAULT_KEY, JSON.stringify(_entries)); }
-
-  /* ── UI helpers ── */
-  function showPanel(name){
-    ["unlock","manage"].forEach(function(p){
-      document.getElementById("vm-panel-"+p).style.display = p===name?"block":"none";
-    });
-  }
-  function setMsg(id, text, ok){
-    var el=document.getElementById(id);
-    el.className="vm-msg"+(ok?" ok":" err");
-    el.textContent=text;
-  }
-  function clearMsg(id){ var el=document.getElementById(id); el.className="vm-msg"; el.textContent=""; }
-
-  function rebuildDropdown(){
-    var sel=document.getElementById("vm-select");
-    var cur=sel.value;
-    sel.innerHTML="<option value=''>— choose a token —</option>";
-    // Only show Asana-typed tokens from the shared vault
-    _entries.filter(function(e){return e.type==="asana";}).forEach(function(e){
-      var o=document.createElement("option");
-      o.value=e.name; o.textContent=e.name;
-      sel.appendChild(o);
-    });
-    if(cur && _entries.find(function(e){return e.name===cur;})) sel.value=cur;
-  }
-
-  function renderTokenList(){
-    var el=document.getElementById("vm-token-list");
-    if(!_entries.length){el.innerHTML="<span style='color:#9ca3af'>No tokens saved yet.</span>";return;}
-    el.innerHTML="<div style='font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-bottom:6px'>Saved tokens</div>"+
-      _entries.map(function(e){
-        return "<div style='display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:13px'>"
-          +"<span style='font-weight:600;color:#374151'>"+e.name+"</span>"
-          +"<div style='display:flex;gap:6px'>"
-          +"<button class='vm-btn secondary' style='padding:3px 10px;font-size:12px' onclick='Vault.editEntry(\""+e.name+"\")'>&#x270E; Edit</button>"
-          +"<button class='vm-btn' style='padding:3px 10px;font-size:12px;color:#dc2626;border-color:#fca5a5' onclick='Vault.deleteEntry(\""+e.name+"\")'>&#x1F5D1;</button>"
-          +"</div></div>";
-      }).join("");
-  }
-
-  function setStatusBar(msg, ok){
-    var el=document.getElementById("vault-status-bar");
-    el.className="vault-status"+(ok?" saved":"");
-    el.innerHTML=msg;
-  }
-
-  var pub = {
-    openModal: function(){
-      clearMsg("vm-unlock-msg"); clearMsg("vm-manage-msg");
-      document.getElementById("vm-unlock-pw").value="";
-      if(_pw){
-        // already unlocked this session
-        rebuildDropdown(); renderTokenList();
-        showPanel("manage");
-      } else {
-        showPanel("unlock");
-        setTimeout(function(){document.getElementById("vm-unlock-pw").focus();},50);
-      }
-      document.getElementById("vault-modal-bg").classList.add("open");
-    },
-
-    closeModal: function(){
-      document.getElementById("vault-modal-bg").classList.remove("open");
-      document.getElementById("vm-add-name").value="";
-      document.getElementById("vm-add-tok").value="";
-      clearMsg("vm-manage-msg");
-    },
-
-    unlock: async function(){
-      var pw  = document.getElementById("vm-unlock-pw").value;
-      clearMsg("vm-unlock-msg");
-      if(!pw){setMsg("vm-unlock-msg","Enter your master password.",false);return;}
-      var entries=loadEntries();
-  // Validate password against first entry if any exist
-      if(entries.length>0){
-        try{ await decrypt(entries[0].enc, pw); }
-        catch(e){ setMsg("vm-unlock-msg","Incorrect password.",false); document.getElementById("vm-unlock-pw").select(); return; }
-      }
-      // Unlocked!
-      _pw=pw; _entries=entries;
-      setStatusBar("&#x1F513; Vault unlocked — "+_entries.length+" token(s) available.", true);
-      rebuildDropdown(); renderTokenList();
-      showPanel("manage");
-    },
-
-    useSelected: async function(){
-      var name=document.getElementById("vm-select").value;
-      if(!name){setMsg("vm-manage-msg","Select a token first.",false);return;}
-      var entry=_entries.find(function(e){return e.name===name;});
-      if(!entry){setMsg("vm-manage-msg","Token not found.",false);return;}
-      try{
-        var tok=await decrypt(entry.enc,_pw);
-        // Store in session so child tracker pages can read it
-        sessionStorage.setItem("cv_session_asana", tok);
-        sessionStorage.setItem("asana_token_hub", tok);
-        document.getElementById("token-input").value=tok;
-        setStatusBar("&#x1F513; Using token: <b>"+name+"</b>", true);
-        pub.closeModal();
-        loadAll();
-      }catch(e){setMsg("vm-manage-msg","Decryption failed.",false);}
-    },
-
-    addToken: async function(){
-      var name=document.getElementById("vm-add-name").value.trim();
-      var tok =document.getElementById("vm-add-tok").value.trim();
-      clearMsg("vm-manage-msg");
-      if(!name){setMsg("vm-manage-msg","Enter a token name.",false);return;}
-      if(!tok) {setMsg("vm-manage-msg","Paste the token value.",false);return;}
-      try{
-        var enc=await encrypt(tok,_pw);
-        // Replace if name exists, otherwise append
-        var idx=_entries.findIndex(function(e){return e.name===name;});
-        if(idx>=0) _entries[idx]={name:name,enc:enc};
-        else _entries.push({name:name,enc:enc});
-        saveEntries();
-        rebuildDropdown(); renderTokenList();
-        document.getElementById("vm-add-name").value="";
-        document.getElementById("vm-add-tok").value="";
-        document.getElementById("vm-select").value=name;
-        setMsg("vm-manage-msg","✔ \""+name+"\" saved.",true);
-        setTimeout(function(){clearMsg("vm-manage-msg");},2500);
-      }catch(e){setMsg("vm-manage-msg","Encryption failed.",false);}
-    },
-
-    editEntry: async function(name){
-      var entry=_entries.find(function(e){return e.name===name;});
-      if(!entry)return;
-      try{
-        var tok=await decrypt(entry.enc,_pw);
-        document.getElementById("vm-add-name").value=name;
-        document.getElementById("vm-add-tok").value=tok;
-        document.getElementById("vm-add-tok").focus();
-      }catch(e){setMsg("vm-manage-msg","Could not load token for editing.",false);}
-    },
-
-    deleteEntry: function(name){
-      if(!confirm("Delete token \""+name+"\"?"))return;
-      _entries=_entries.filter(function(e){return e.name!==name;});
-      saveEntries();
-      rebuildDropdown(); renderTokenList();
-      var sel=document.getElementById("vm-select");
-      if(sel.value===name) sel.value="";
-    },
-
-    deleteSelected: function(){
-      var name=document.getElementById("vm-select").value;
-      if(!name){setMsg("vm-manage-msg","Select a token to delete.",false);return;}
-      pub.deleteEntry(name);
-    },
-
-    resetVault: function(){
-      if(!confirm("Clear the ENTIRE vault? All saved tokens will be deleted."))return;
-      localStorage.removeItem(VAULT_KEY);
-      _pw=null; _entries=[];
-      setStatusBar("Vault cleared.", false);
-      showPanel("unlock");
-    }
-  };
-  return pub;
-})();
-
-/* Show hint on load if vault has entries */
-window.addEventListener("load", function(){
-  try{
-    var entries=JSON.parse(localStorage.getItem(VAULT_KEY)||"[]");
-    if(entries.length){
-      document.getElementById("vault-status-bar").innerHTML=
-        "&#x1F512; "+entries.length+" token(s) in vault — click <b>🔒 Vault</b> and enter your master password.";
-    }
-  }catch(e){}
-  var s=sessionStorage.getItem("asana_token_hub");
-  if(s){ document.getElementById("token-input").value=s; loadAll(); }
-});
-</script>
-
-<!-- ══════════════════════════════════════
-     DASHBOARD JS (original, unchanged)
-════════════════════════════════════════ -->
-<script>
-var ASANA_BASE="https://app.asana.com/api/1.0",CHECKLIST_GID="1213736136206851";
-var INSTALL_PROJECTS=[
-  {id:"cis",gid:"1211708203704329",subEl:"sub-cis",miniEl:"mini-cis",tsEl:"ts-cis"},
-  {id:"ps", gid:"1211708717690220",subEl:"sub-ps", miniEl:"mini-ps", tsEl:"ts-ps"},
-  {id:"wk", gid:"1211708203705602",subEl:"sub-wk", miniEl:"mini-wk", tsEl:"ts-wk"},
-  {id:"fin",gid:"1211718908829177",subEl:"sub-fin",miniEl:"mini-fin",tsEl:"ts-fin"},
-  {id:"sso",gid:"1211708717686077",subEl:"sub-sso",miniEl:"mini-sso",tsEl:"ts-sso"}
-];
-var STATUS_META={"Live":{bg:"#d1fae5",text:"#065f46",border:"#6ee7b7"},"Scheduled":{bg:"#dbeafe",text:"#1e40af",border:"#93c5fd"},"In Progress":{bg:"#e0f2fe",text:"#0c4a6e",border:"#7dd3fc"},"Ready to Schedule":{bg:"#cffafe",text:"#155e75",border:"#67e8f9"},"Staged":{bg:"#ede9fe",text:"#4c1d95",border:"#c4b5fd"},"Pre Staged":{bg:"#fef3c7",text:"#92400e",border:"#fcd34d"}};
-var SECTION_MAP={"live":"Live","scheduled":"Scheduled","in progress":"In Progress","release":"Release","prod release":"Release","production release":"Release","ready to schedule":"Ready to Schedule","staged":"Staged","pre staged":"Pre Staged","pre-staged":"Pre Staged","devops":"nextup","up next":"nextup","up next for uat":"nextup","uat":"nextup","remaining":"remaining","development":"remaining","in development":"remaining","milestones":"milestones"};
-
-function getToken(){
-  var t=document.getElementById("token-input").value.trim();
-  ["hub","cis","ps","wk","fin","sso","cl"].forEach(function(k){sessionStorage.setItem("asana_token_"+k,t);});
-  var enc=encodeURIComponent(t);
-  var links={"cl-launch-btn":"checklists_tracker.html","cis-launch-btn":"cis_tracker.html","ps-launch-btn":"ps_tracker.html","wk-launch-btn":"works_tracker.html","fin-launch-btn":"fin_tracker.html","sso-launch-btn":"sso_tracker.html"};
-  for(var id in links){var el=document.getElementById(id);if(el)el.href=links[id]+(t?"?token="+enc:"");}
-  return t;
+// ── Derive UAT / Release status from task description ──────────────────────
+function deriveNextupStatus(notes){
+  if(!notes)return null;
+  var n=notes.toLowerCase();
+  // Check for "production release" or "prod release" before plain "release"
+  if(n.indexOf("production release")>=0||n.indexOf("prod release")>=0)return"Release";
+  if(n.indexOf("release")>=0)return"Release";
+  if(n.indexOf("uat")>=0)return"UAT";
+  return null;
 }
-function apiFetch(url,token){return fetch(url,{headers:{"Authorization":"Bearer "+token,"Accept":"application/json"}}).then(function(r){if(!r.ok)return r.text().then(function(txt){throw new Error(r.status+": "+txt);});return r.json();});}
-function loadAll(){
-  var token=getToken();
-  if(!token){alert("Please paste your Asana token first.");return;}
-  document.getElementById("btn-load").disabled=true;
-  var done=0,total=INSTALL_PROJECTS.length+1;
-  function tick(){done++;if(done>=total)document.getElementById("btn-load").disabled=false;}
-  INSTALL_PROJECTS.forEach(function(p){loadInstallProject(p,token,tick);});
-  loadChecklists(token,tick);
-}
-function loadInstallProject(p,token,onDone){
-  var miniEl=document.getElementById(p.miniEl);
-  miniEl.innerHTML="<span class='loading-card'><span class='spin'></span>Loading...</span>";
-  document.getElementById(p.id+"-live").textContent="-";
-  document.getElementById(p.id+"-sched").textContent="-";
-  document.getElementById(p.id+"-other").textContent="-";
-  document.getElementById(p.tsEl).textContent="";
-  apiFetch(ASANA_BASE+"/projects/"+p.gid+"/sections?opt_fields=gid,name&limit=100",token)
+// ───────────────────────────────────────────────────────────────────────────
+
+function statusBadge(s){if(!s)return"<span style='color:#d1d5db;font-size:.9rem'>-</span>";var m=STATUS_META[s];if(!m)return"<span>"+esc(s)+"</span>";return"<span class='sbadge' style='background:"+m.bg+";color:"+m.text+";border-color:"+m.border+"'><span class='dot' style='background:"+m.dot+"'></span>"+s+"</span>";}
+function showError(msg){document.getElementById("error-area").innerHTML="<div class='error-box'>&#x274C; "+esc(msg)+"</div>";}
+function clearError(){document.getElementById("error-area").innerHTML="";}
+function setLoading(m){document.getElementById("loading-area").innerHTML="<div class='loading'><span class='spin'></span>"+esc(m)+"</div>";}
+function clearLoading(){document.getElementById("loading-area").innerHTML="";}
+function getToken(){return sessionStorage.getItem("asana_token_cis")||sessionStorage.getItem("asana_token_hub")||"";}
+window.onload=function(){
+  var urlParam=new URLSearchParams(window.location.search).get("token");
+  if(urlParam)sessionStorage.setItem("asana_token_cis",urlParam);
+  var s=getToken();
+  if(s)loadData();
+  else showError("No token found. Go back to <a href='index.html'>CentralView Hub</a>, enter your token, then return here.");
+};
+function apiFetch(url){return fetch(url,{headers:{"Authorization":"Bearer "+getToken(),"Accept":"application/json"}}).then(function(r){if(!r.ok)return r.text().then(function(txt){throw new Error("Asana "+r.status+": "+txt);});return r.json();});}
+function fetchAllPages(path){var base=ASANA_BASE+path,acc=[];function go(url){return apiFetch(url).then(function(json){acc=acc.concat(json.data||[]);if(json.next_page&&json.next_page.offset){var sep=base.indexOf("?")>=0?"&":"?";return go(base+sep+"offset="+encodeURIComponent(json.next_page.offset));}return acc;});}return go(base);}
+
+function loadData(){
+  if(!getToken()){showError("No token found. Go back to <a href='index.html'>CentralView Hub</a>, enter your token, then return here.");return;}
+  clearError();setLoading("Connecting to Asana...");
+  document.getElementById("dashboard").style.display="none";
+  document.getElementById("btn-refresh").style.display="none";
+  document.getElementById("btn-excel").style.display="none";
+  document.getElementById("total-badge").style.display="none";
+
+  apiFetch(ASANA_BASE+"/projects/"+PROJECT_GID+"/custom_field_settings?opt_fields=custom_field.gid,custom_field.name&limit=100")
+  .then(function(cf){
+    var fields=cf.data||[];
+    for(var f=0;f<fields.length;f++){
+      var n=(fields[f].custom_field&&fields[f].custom_field.name)||"";
+      if(n.toLowerCase()==="github issue"){GITHUB_FIELD_GID=fields[f].custom_field.gid;break;}
+    }
+  })
+  .catch(function(){GITHUB_FIELD_GID=null;})
+  .then(function(){
+    return apiFetch(ASANA_BASE+"/projects/"+PROJECT_GID+"/sections?opt_fields=gid,name&limit=100");
+  })
   .then(function(json){
     var sections=json.data||[],secInfo={};
     for(var i=0;i<sections.length;i++){
-      var sec=sections[i],key=sec.name.toLowerCase().trim(),mapped=SECTION_MAP[key]||null,grp,sta;
-      if(mapped&&mapped!=="nextup"&&mapped!=="remaining"&&mapped!=="milestones"){grp="production";sta=mapped;}
-      else if(mapped==="nextup"){grp="nextup";sta=null;}
-      else if(mapped==="milestones"){grp="milestones";sta=null;}
+      var sec=sections[i],key=sec.name.toLowerCase().trim(),map=SECTION_MAP[key]||null,grp,sta;
+      if(map){grp=map.group;sta=map.status;}
       else{var lo=sec.name.toLowerCase();if(lo.indexOf("live")>=0){grp="production";sta="Live";}else if(lo.indexOf("in prog")>=0){grp="production";sta="In Progress";}else if(lo.indexOf("sched")>=0){grp="production";sta="Scheduled";}else if(lo.indexOf("ready")>=0){grp="production";sta="Ready to Schedule";}else if(lo.indexOf("stage")>=0){grp="production";sta="Staged";}else if(lo.indexOf("uat")>=0||lo.indexOf("up next")>=0){grp="nextup";sta=null;}else if(lo.indexOf("milesto")>=0){grp="milestones";sta=null;}else{grp="remaining";sta=null;}}
-      secInfo[sec.gid]={group:grp,status:sta};
+      secInfo[sec.gid]={raw:sec.name,group:grp,status:sta,keepCompleted:!!INCLUDE_COMPLETED[grp]};
     }
-    var counts={"Live":0,"Scheduled":0,"In Progress":0,"Ready to Schedule":0,"Staged":0,"Pre Staged":0},total=0;
-    function nextSec(idx){
-      if(idx>=sections.length){updateInstallCard(p,counts,total,miniEl);if(onDone)onDone();return Promise.resolve();}
-      var sec=sections[idx],inf=secInfo[sec.gid];
-      return apiFetch(ASANA_BASE+"/sections/"+sec.gid+"/tasks?opt_fields=gid,completed&limit=100",token)
-      .then(function(tj){
-        var tasks=tj.data||[];
-        for(var j=0;j<tasks.length;j++){var t=tasks[j];if(inf.group==="milestones")continue;var keep=(inf.group==="production"||inf.group==="nextup");if(t.completed&&!keep)continue;total++;if(inf.status&&counts[inf.status]!==undefined)counts[inf.status]++;}
-        return nextSec(idx+1);
-      }).catch(function(){return nextSec(idx+1);});
+    allItems=[];milestoneItems=[];var secList=sections,loaded=0;
+    function loadNext(idx){
+      if(idx>=secList.length){
+        if(milestoneItems.length===0){clearLoading();renderDashboard();if(refreshTimer)clearInterval(refreshTimer);refreshTimer=setInterval(loadData,15*60*1000);return Promise.resolve();}
+        setLoading("Loading milestone progress...");
+        var promises=milestoneItems.map(function(ms){return apiFetch(ASANA_BASE+"/tasks/"+ms.gid+"/subtasks?opt_fields=gid,completed&limit=100").then(function(j){var subs=j.data||[];ms.totalSubs=subs.length;ms.doneSubs=subs.filter(function(s){return s.completed;}).length;var goal=parseGoal(ms.name);if(goal!==null){ms.goal=goal;ms.pct=Math.min(100,Math.round((ms.doneSubs/goal)*100));ms.remaining=Math.max(0,goal-ms.doneSubs);}else{ms.goal=null;ms.pct=ms.completed?100:(subs.length>0?Math.round((ms.doneSubs/subs.length)*100):0);ms.remaining=null;}}).catch(function(){ms.totalSubs=0;ms.doneSubs=0;ms.goal=null;ms.pct=ms.completed?100:0;ms.remaining=null;});});
+        return Promise.all(promises).then(function(){clearLoading();renderDashboard();if(refreshTimer)clearInterval(refreshTimer);refreshTimer=setInterval(loadData,15*60*1000);});
+      }
+      var sec=secList[idx],inf=secInfo[sec.gid];
+      setLoading("Loading "+(idx+1)+"/"+secList.length+": "+sec.name+" ("+loaded+" so far)");
+      var taskFields="gid,name,completed,due_on,assignee.name,notes,resource_subtype"+(GITHUB_FIELD_GID?",custom_fields":"");
+      return fetchAllPages("/sections/"+sec.gid+"/tasks?opt_fields="+taskFields+"&limit=100")
+      .then(function(tasks){
+        for(var j=0;j<tasks.length;j++){
+          var t=tasks[j];
+          var isMilestone=(t.resource_subtype==="milestone")||(inf.group==="milestones");
+          if(isMilestone){var daysLeft=t.due_on?Math.ceil((new Date(t.due_on+"T00:00:00")-new Date())/86400000):null;var msStat=t.completed?"complete":(daysLeft===null?"unknown":daysLeft<0?"behind":daysLeft<=7?"at-risk":"on-track");milestoneItems.push({gid:t.gid,name:t.name,due:t.due_on||"",daysLeft:daysLeft,status:msStat,completed:t.completed||false,section:inf.raw,totalSubs:0,doneSubs:0,pct:0,goal:null,remaining:null});continue;}
+          if(t.completed&&!inf.keepCompleted)continue;
+          var githubUrl="";
+          if(GITHUB_FIELD_GID&&t.custom_fields){for(var cf=0;cf<t.custom_fields.length;cf++){if(t.custom_fields[cf].gid===GITHUB_FIELD_GID){githubUrl=t.custom_fields[cf].text_value||t.custom_fields[cf].url_value||t.custom_fields[cf].display_value||"";break;}}}
+
+          // ── Derive status for nextup items from the task description ──
+          var derivedStatus = inf.status;
+          if(inf.group==="nextup"){
+            derivedStatus = deriveNextupStatus(t.notes) || null;
+          }
+          // ──────────────────────────────────────────────────────────────
+
+          allItems.push({gid:t.gid,name:t.name,group:inf.group,status:derivedStatus,section:inf.raw,date:t.due_on||"",assignee:(t.assignee&&t.assignee.name)?t.assignee.name:"",note:cleanNote(t.notes),completed:t.completed||false,githubUrl:githubUrl});
+          loaded++;
+        }
+        return loadNext(idx+1);
+      });
     }
-    return nextSec(0);
-  }).catch(function(e){document.getElementById(p.miniEl).innerHTML="<span class='error-small'>&#x274C; "+e.message+"</span>";if(onDone)onDone();});
+    return loadNext(0);
+  }).catch(function(e){clearLoading();showError(e.message);});
 }
-function updateInstallCard(p,counts,total,miniEl){
-  var live=counts["Live"]||0,sched=counts["Scheduled"]||0;
-  document.getElementById(p.id+"-live").textContent=live;
-  document.getElementById(p.id+"-sched").textContent=sched;
-  document.getElementById(p.id+"-other").textContent=Math.max(0,total-live-sched);
-  document.getElementById(p.subEl).textContent=total+" total installs";
-  document.getElementById(p.tsEl).textContent="Updated "+new Date().toLocaleTimeString();
-  var show=["In Progress","Ready to Schedule","Staged","Pre Staged"],badges="";
-  show.forEach(function(s){if(counts[s]>0){var m=STATUS_META[s]||{};badges+="<span class='mini-badge' style='background:"+m.bg+";color:"+m.text+";border-color:"+m.border+"'>"+counts[s]+" "+s+"</span>";}});
-  miniEl.innerHTML=badges||"<span style='font-size:0.85rem;color:#9ca3af'>No active pipeline items</span>";
-}
-function loadChecklists(token,onDone){
-  document.getElementById("cl-overdue-list").innerHTML="<span class='loading-card'><span class='spin'></span>Loading...</span>";
-  document.getElementById("cl-atrisk-list").innerHTML="";
-  ["cl-complete","cl-ok","cl-warn","cl-over"].forEach(function(id){document.getElementById(id).textContent="-";});
-  apiFetch(ASANA_BASE+"/projects/"+CHECKLIST_GID+"/tasks?opt_fields=gid,name,completed,due_on&limit=100",token)
-  .then(function(json){
-    var tasks=(json.data||[]).filter(function(t){return !t.completed;});
-    if(tasks.length===0){["cl-complete","cl-ok","cl-warn","cl-over"].forEach(function(id){document.getElementById(id).textContent="0";});document.getElementById("cl-overdue-list").innerHTML="<span style='font-size:.85rem;color:#9ca3af'>None</span>";document.getElementById("cl-atrisk-list").innerHTML="<span style='font-size:.85rem;color:#9ca3af'>None</span>";document.getElementById("sub-cl").textContent="0 installations";document.getElementById("ts-cl").textContent="Updated "+new Date().toLocaleTimeString();if(onDone)onDone();return;}
-    var results=[],done=0;
-    tasks.forEach(function(task){
-      apiFetch(ASANA_BASE+"/tasks/"+task.gid+"/subtasks?opt_fields=gid,completed&limit=100",token)
-      .then(function(sj){
-        var subs=sj.data||[],comp=subs.filter(function(s){return s.completed;}).length,rem=subs.length-comp;
-        var daysLeft=task.due_on?Math.ceil((new Date(task.due_on+"T00:00:00")-new Date())/86400000):null;
-        var urgency;
-        if(rem===0)urgency="complete";
-        else if(daysLeft===null)urgency="nodate";
-        else if(daysLeft<=7)urgency="overdue";
-        else if(daysLeft<=14)urgency="atrisk";
-        else urgency="ontrack";
-        return apiFetch(ASANA_BASE+"/tasks/"+task.gid+"?opt_fields=parent.name",token)
-        .then(function(pj){
-          var parentName=(pj.data&&pj.data.parent&&pj.data.parent.name)?pj.data.parent.name:null;
-          results.push({name:task.name,parentName:parentName,daysLeft:daysLeft,rem:rem,total:subs.length,urgency:urgency});
-        }).catch(function(){
-          results.push({name:task.name,parentName:null,daysLeft:daysLeft,rem:rem,total:subs.length,urgency:urgency});
-        });
-      }).catch(function(){results.push({name:task.name,parentName:null,daysLeft:null,rem:0,total:0,urgency:"nodate"});})
-      .finally(function(){done++;if(done===tasks.length)renderChecklistCard(results,tasks.length,onDone);});
+
+function renderDashboard(){document.getElementById("dashboard").style.display="block";document.getElementById("btn-refresh").style.display="inline-flex";document.getElementById("btn-excel").style.display="inline-flex";var tb=document.getElementById("total-badge");tb.style.display="inline-block";tb.textContent=allItems.length+" installs";document.getElementById("last-refresh").textContent="Refreshed "+new Date().toLocaleTimeString();renderStats();renderMilestones();updateTabCounts();renderActive();}
+function renderStats(){var counts={};PRIMARY_STATUSES.concat(SECONDARY_STATUSES).forEach(function(s){counts[s]=0;});allItems.forEach(function(it){if(it.status&&counts[it.status]!==undefined)counts[it.status]++;});var ph=document.getElementById("primary-stats");ph.innerHTML="";PRIMARY_STATUSES.forEach(function(s){var m=STATUS_META[s],d=document.createElement("div");d.className="stat-p";d.style.background=m.bg;d.style.borderColor=m.border;d.innerHTML='<div class="num" style="color:'+m.text+'">'+counts[s]+'</div><div class="lbl" style="color:'+m.text+'">'+s+'</div>';ph.appendChild(d);});var sh=document.getElementById("secondary-stats");sh.innerHTML="";SECONDARY_STATUSES.forEach(function(s){var m=STATUS_META[s],d=document.createElement("div");d.className="stat-s";d.style.background=m.bg;d.style.borderColor=m.border;d.innerHTML='<div class="num" style="color:'+m.text+'">'+counts[s]+'</div><div class="lbl" style="color:'+m.text+'">'+s+'</div>';sh.appendChild(d);});}
+function renderMilestones(){var DOT={complete:"#10b981","on-track":"#3b82f6","at-risk":"#f59e0b",behind:"#ef4444",unknown:"#9ca3af"};var sorted=milestoneItems.slice().sort(function(a,b){var o={behind:0,"at-risk":1,"on-track":2,unknown:3,complete:4};return(o[a.status]||0)-(o[b.status]||0);});var barLabels=[],barDone=[],barRemain=[],barColors=[];sorted.forEach(function(m){barLabels.push(stripGoal(m.name));barDone.push(m.doneSubs);barRemain.push(m.goal!==null?Math.max(0,m.goal-m.doneSubs):Math.max(0,m.totalSubs-m.doneSubs));barColors.push(DOT[m.status]||"#9ca3af");});var ctx=document.getElementById("ms-chart").getContext("2d");if(msChart)msChart.destroy();msChart=new Chart(ctx,{type:"bar",data:{labels:barLabels,datasets:[{label:"Completed",data:barDone,backgroundColor:barColors,borderRadius:4,borderSkipped:false},{label:"Remaining",data:barRemain,backgroundColor:"#e5e7eb",borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true,ticks:{font:{size:13},maxRotation:30},grid:{display:false}},y:{stacked:true,ticks:{font:{size:13},stepSize:1},grid:{color:"#f3f4f6"}}},plugins:{legend:{position:"bottom",labels:{font:{size:13},padding:14,generateLabels:function(){return[{text:"Completed",fillStyle:"#4338ca",strokeStyle:"#4338ca"},{text:"Remaining",fillStyle:"#e5e7eb",strokeStyle:"#e5e7eb"}];}}},tooltip:{callbacks:{label:function(c){var ms=sorted[c.dataIndex];if(!ms)return"";if(c.datasetIndex===0)return"Completed: "+ms.doneSubs+(ms.goal!==null?" of "+ms.goal:"");return"Remaining: "+(ms.goal!==null?Math.max(0,ms.goal-ms.doneSubs):Math.max(0,ms.totalSubs-ms.doneSubs));}}}}}});}
+function updateTabCounts(){["production","nextup","remaining"].forEach(function(g){document.getElementById("cnt-"+g).textContent=byGroup(g).length;});}
+function switchTab(tab){activeTab=tab;["production","nextup","remaining"].forEach(function(g){document.getElementById("tab-btn-"+g).className="tab"+(g===tab?" active":"");document.getElementById("pane-"+g).style.display=g===tab?"block":"none";});document.getElementById("status-filter").style.display=tab==="production"?"inline-block":"none";renderActive();}
+function renderActive(){renderGroup(activeTab);}
+function clearFilters(){document.getElementById("search-input").value="";document.getElementById("status-filter").value="";renderActive();}
+function sortBy(tab,col){var s=sortState[tab];if(s.col===col){s.dir*=-1;}else{s.col=col;s.dir=1;}renderGroup(tab);}
+function byGroup(g){return allItems.filter(function(it){return it.group===g;});}
+function renderGroup(g){
+  var search=document.getElementById("search-input").value.toLowerCase(),sf=document.getElementById("status-filter").value,items=byGroup(g);
+  if(search)items=items.filter(function(it){return it.name.toLowerCase().indexOf(search)>=0;});
+  if(sf)items=items.filter(function(it){return it.status===sf;});
+  var ss=sortState[g];
+  // For nextup tab, always sort UAT first, then Release, then blank — ignoring manual sort state
+  if(g==="nextup"){
+    var NEXTUP_ORDER={"UAT":0,"Release":1};
+    items.sort(function(a,b){
+      var ao=a.status in NEXTUP_ORDER?NEXTUP_ORDER[a.status]:2;
+      var bo=b.status in NEXTUP_ORDER?NEXTUP_ORDER[b.status]:2;
+      if(ao!==bo)return ao-bo;
+      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
     });
-  }).catch(function(e){document.getElementById("cl-overdue-list").innerHTML="<span style='color:#dc2626;font-size:.875rem'>&#x274C; "+e.message+"</span>";if(onDone)onDone();});
-}
-function renderChecklistCard(results,totalCount,onDone){
-  var counts={complete:0,ontrack:0,atrisk:0,overdue:0};
-  results.forEach(function(r){if(counts[r.urgency]!==undefined)counts[r.urgency]++;});
-  document.getElementById("cl-complete").textContent=counts.complete;
-  document.getElementById("cl-ok").textContent=counts.ontrack;
-  document.getElementById("cl-warn").textContent=counts.atrisk;
-  document.getElementById("cl-over").textContent=counts.overdue;
-  document.getElementById("sub-cl").textContent=totalCount+" installations";
-  document.getElementById("ts-cl").textContent="Updated "+new Date().toLocaleTimeString();
-  function makeRows(items){
-    if(items.length===0)return"";
-    var clHref=document.getElementById("cl-launch-btn").href;
-    return items.slice(0,8).map(function(r){
-      var dot=r.urgency==="overdue"?"#ef4444":"#f59e0b";
-      var days=r.daysLeft===null?"No date":r.daysLeft<0?Math.abs(r.daysLeft)+"d overdue":r.daysLeft+"d left";
-      var dc=r.urgency==="overdue"?"#ef4444":"#d97706";
-      var displayName=r.parentName?r.parentName:r.name;
-      return"<a href='"+clHref+"' target='_blank' class='cl-row' style='text-decoration:none;display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f9fafb;font-size:0.875rem;cursor:pointer' onmouseover=\"this.style.background='#fef3c7'\" onmouseout=\"this.style.background=''\">"+
-        "<span class='cl-dot' style='background:"+dot+"'></span>"+
-        "<span class='cl-name' title='"+displayName+"'>"+displayName+"</span>"+
-        "<span style='font-size:.72rem;color:#9ca3af;margin:0 3px'>"+r.rem+"/"+r.total+"</span>"+
-        "<span class='cl-days' style='color:"+dc+"'>"+days+"</span>"+
-      "</a>";
-    }).join("")+(items.length>8?"<div style='font-size:.78rem;color:#9ca3af;padding:4px 0'>+"+(items.length-8)+" more</div>":"");
+  } else {
+    items.sort(function(a,b){var av,bv;if(ss.col==="name"){av=a.name.toLowerCase();bv=b.name.toLowerCase();}else if(ss.col==="status"){av=STATUS_ORDER.indexOf(a.status);bv=STATUS_ORDER.indexOf(b.status);if(av<0)av=99;if(bv<0)bv=99;return(av-bv)*ss.dir;}else if(ss.col==="date"){av=a.date||"";bv=b.date||"";}else{av=a.name.toLowerCase();bv=b.name.toLowerCase();}if(av<bv)return-1*ss.dir;if(av>bv)return 1*ss.dir;return 0;});
   }
-  var overdue=results.filter(function(r){return r.urgency==="overdue";}).sort(function(a,b){return(a.daysLeft||0)-(b.daysLeft||0);});
-  var atrisk =results.filter(function(r){return r.urgency==="atrisk"; }).sort(function(a,b){return(a.daysLeft||999)-(b.daysLeft||999);});
-  document.getElementById("cl-overdue-list").innerHTML=makeRows(overdue)||"<span style='font-size:.85rem;color:#9ca3af'>None</span>";
-  document.getElementById("cl-atrisk-list").innerHTML =makeRows(atrisk) ||"<span style='font-size:.85rem;color:#9ca3af'>None</span>";
-  if(onDone)onDone();
+  function thHtml(col,label){var active=ss.col===col,icon=active?(ss.dir===1?"&#9650;":"&#9660;"):"&#9650;";return"<th class='"+(active?"sorted":"")+"' onclick='sortBy(\""+g+"\",\""+col+"\")'>"+label+" <span class='sort-icon'>"+icon+"</span></th>";}
+  var simplified=(g==="remaining"),hdr;
+  if(simplified){hdr=thHtml("name","Customer / Utility")+thHtml("section","Section");}
+  else{hdr=thHtml("name","Customer / Utility")+thHtml("status","Status")+thHtml("date",g==="nextup"?"Release Date":"Production Date");}
+  var rows="";
+  for(var i=0;i<items.length;i++){
+    var it=items[i],dim=it.completed?"opacity:0.55;":"";
+    var nameHtml=it.githubUrl?"<a href='"+esc(it.githubUrl)+"' target='_blank' style='color:#1d4ed8;text-decoration:underline;font-weight:500'>"+esc(it.name)+"</a>":"<span style='font-weight:500'>"+esc(it.name)+"</span>";
+    var noteHtml=it.note?"<div style='font-size:0.78rem;color:#9ca3af;margin-top:2px'>"+esc(it.note)+"</div>":"";
+    if(simplified){rows+="<tr><td style='"+dim+"'>"+nameHtml+"</td><td style='color:#6b7280'>"+esc(it.section)+"</td></tr>";}
+    else{rows+="<tr><td style='max-width:340px;"+dim+"'>"+nameHtml+noteHtml+"</td><td>"+statusBadge(it.status)+"</td><td style='color:#1d4ed8;font-weight:600'>"+(it.date?fmtDate(it.date):"<span style='color:#d1d5db'>-</span>")+"</td></tr>";}
+  }
+  var title = g==="nextup" ? "Up Next for UAT / Production Release" : GROUP_TITLES[g];
+  document.getElementById("pane-"+g).innerHTML="<div class='group-hdr' style='background:"+GROUP_COLORS[g]+"'><span class='gtitle'>"+title+"<span class='gcnt'>"+items.length+"</span></span></div><div class='tbl-wrap'>"+(items.length===0?"<p class='empty'>No items match your filter.</p>":"<table><thead><tr>"+hdr+"</tr></thead><tbody>"+rows+"</tbody></table>")+"</div>";
 }
+function exportExcel(){if(!allItems.length){alert("Load the dashboard first.");return;}try{var wb=XLSX.utils.book_new();[{key:"production",label:"Production"},{key:"nextup",label:"Next Up"},{key:"remaining",label:"Remaining"}].forEach(function(sh){var rows=byGroup(sh.key).map(function(it){return{"Customer / Utility":it.name,"Status":it.status||"","Section":it.section,"Due Date":it.date||"","GitHub Issue":it.githubUrl||"","Completed":it.completed?"Yes":"No"};});var ws=XLSX.utils.json_to_sheet(rows);ws["!cols"]=[{wch:45},{wch:20},{wch:25},{wch:14},{wch:40},{wch:10}];XLSX.utils.book_append_sheet(wb,ws,sh.label);});var msRows=milestoneItems.map(function(m){return{"Milestone":stripGoal(m.name),"Goal":m.goal||"","Completed":m.doneSubs,"Remaining":m.remaining!==null?m.remaining:"","Due Date":m.due||"","Status":m.status};});var msWs=XLSX.utils.json_to_sheet(msRows);msWs["!cols"]=[{wch:45},{wch:8},{wch:10},{wch:10},{wch:14},{wch:12}];XLSX.utils.book_append_sheet(wb,msWs,"Milestones");XLSX.writeFile(wb,"CIS-Installs-Tracker.xlsx");}catch(e){alert("Export failed: "+e.message);}}
 </script>
 </body>
 </html>
