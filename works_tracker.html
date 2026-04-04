@@ -2,22 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Power Search Installs</title>
+<title>Works Installs</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f9fafb;color:#1a1a1a;min-height:100vh;font-size:16px}
-.header{background:#0891b2;padding:16px 24px;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+.header{background:#059669;padding:16px 24px;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
 .header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .header h1{color:white;font-weight:700;font-size:1.3rem;margin:0}
-.header p{color:#cffafe;font-size:0.85rem;margin-top:2px}
+.header p{color:#d1fae5;font-size:0.85rem;margin-top:2px}
 .header-btns{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .badge-white{background:rgba(255,255,255,0.2);color:white;font-size:0.9rem;padding:4px 14px;border-radius:999px;font-weight:600}
 .back-btn{background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:7px 16px;font-size:0.9rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
 .back-btn:hover{background:rgba(255,255,255,0.25)}
 .btn{border:none;border-radius:8px;padding:8px 16px;font-size:0.9rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-.btn-refresh{background:white;color:#0891b2}.btn-refresh:hover{background:#ecfeff}
+.btn-refresh{background:white;color:#059669}.btn-refresh:hover{background:#ecfdf5}
 .btn-excel{background:#16a34a;color:white}.btn-excel:hover{background:#15803d}
 .main{max-width:1200px;margin:0 auto;padding:24px 16px}
 .error-box{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px;color:#991b1b;font-size:1rem;margin-bottom:16px}
@@ -32,9 +32,9 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f9
 .chart-wrap{position:relative;height:320px}
 .tabs{display:flex;gap:4px;border-bottom:1px solid #e5e7eb;margin-bottom:20px}
 .tab{padding:11px 22px;font-size:1rem;font-weight:600;border-radius:8px 8px 0 0;border:none;background:transparent;color:#6b7280;cursor:pointer}
-.tab.active{border:1px solid #e5e7eb;border-bottom:1px solid #f9fafb;background:#f9fafb;color:#0891b2;margin-bottom:-1px;position:relative;z-index:1}
+.tab.active{border:1px solid #e5e7eb;border-bottom:1px solid #f9fafb;background:#f9fafb;color:#059669;margin-bottom:-1px;position:relative;z-index:1}
 .tab-cnt{margin-left:6px;font-size:0.8rem;padding:1px 8px;border-radius:999px;font-weight:700;background:#f3f4f6;color:#6b7280}
-.tab.active .tab-cnt{background:#cffafe;color:#0891b2}
+.tab.active .tab-cnt{background:#d1fae5;color:#059669}
 .search-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:center}
 .search-bar input,.search-bar select{border:1px solid #e5e7eb;border-radius:8px;padding:9px 14px;font-size:0.95rem;background:white;outline:none}
 .group-hdr{border-radius:12px 12px 0 0;padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
@@ -46,14 +46,14 @@ thead{background:#f9fafb;border-bottom:1px solid #e5e7eb}
 th{padding:10px 14px;font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;font-weight:600;cursor:pointer;user-select:none;white-space:nowrap}
 th:hover{background:#f0f0f0;color:#374151}
 th .sort-icon{margin-left:4px;opacity:0.4;font-size:0.7rem}
-th.sorted .sort-icon{opacity:1;color:#0891b2}
+th.sorted .sort-icon{opacity:1;color:#059669}
 td{padding:9px 14px;border-bottom:1px solid #f3f4f6;font-size:0.95rem;vertical-align:middle}
 tr:last-child td{border-bottom:none}tr:hover td{background:#f9fafb}
 .sbadge{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:999px;font-size:0.82rem;font-weight:600;border-width:1px;border-style:solid}
 .dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
 .empty{text-align:center;color:#9ca3af;font-size:1rem;padding:32px}
 .loading{text-align:center;padding:48px;color:#6b7280;font-size:1rem}
-.spin{display:inline-block;width:16px;height:16px;border:2px solid #a5f3fc;border-top-color:#0891b2;border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid #6ee7b7;border-top-color:#059669;border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 .footer{text-align:center;font-size:0.82rem;color:#9ca3af;margin-top:28px;padding-bottom:24px}
 @media(max-width:640px){.stats-row{grid-template-columns:repeat(2,1fr)}}
@@ -62,11 +62,11 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#f9fafb}
 <body>
 <div class="header">
   <div class="header-inner">
-    <div><h1>Power Search Installs</h1><p>Production Push &middot; Every 2 Weeks &middot; Live from Asana</p></div>
+    <div><h1>Works Installs</h1><p>Production Push &middot; Every 2 Weeks &middot; Live from Asana</p></div>
     <div class="header-btns">
       <a class="back-btn" href="index.html">&#8592; CentralView Hub</a>
       <span class="badge-white" id="total-badge" style="display:none"></span>
-      <span id="last-refresh" style="color:#cffafe;font-size:0.85rem"></span>
+      <span id="last-refresh" style="color:#d1fae5;font-size:0.85rem"></span>
       <button class="btn btn-refresh" id="btn-refresh" onclick="loadData()" style="display:none">&#x1F504; Refresh</button>
       <button class="btn btn-excel" id="btn-excel" onclick="exportExcel()" style="display:none">&#x1F4CA; Export Excel</button>
     </div>
@@ -90,16 +90,16 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#f9fafb}
     </div>
     <div id="pane-production"></div><div id="pane-nextup" style="display:none"></div><div id="pane-remaining" style="display:none"></div>
   </div>
-  <p class="footer">Data pulled live from Asana &middot; Power Search Installs &middot; Auto-refreshes every 15 minutes</p>
+  <p class="footer">Data pulled live from Asana &middot; Works Installs &middot; Auto-refreshes every 15 minutes</p>
 </div>
 <script>
-var PROJECT_GID="1211708717690220",ASANA_BASE="https://app.asana.com/api/1.0",ACCENT="#0891b2";
+var PROJECT_GID="1211708203705602",ASANA_BASE="https://app.asana.com/api/1.0",ACCENT="#059669";
 var GITHUB_FIELD_GID=null;
 var SECTION_MAP={"live":{group:"production",status:"Live"},"scheduled":{group:"production",status:"Scheduled"},"in progress":{group:"production",status:"In Progress"},"release":{group:"production",status:"Release"},"prod release":{group:"production",status:"Release"},"production release":{group:"production",status:"Release"},"ready to schedule":{group:"production",status:"Ready to Schedule"},"staged":{group:"production",status:"Staged"},"pre staged":{group:"production",status:"Pre Staged"},"pre-staged":{group:"production",status:"Pre Staged"},"devops":{group:"nextup",status:null},"up next":{group:"nextup",status:null},"up next for uat":{group:"nextup",status:null},"uat":{group:"nextup",status:null},"remaining":{group:"remaining",status:null},"development":{group:"remaining",status:null},"in development":{group:"remaining",status:null},"milestones":{group:"milestones",status:null}};
 var INCLUDE_COMPLETED={production:true,nextup:true};
 var STATUS_META={"Live":{bg:"#d1fae5",text:"#065f46",border:"#6ee7b7",dot:"#10b981"},"Scheduled":{bg:"#dbeafe",text:"#1e40af",border:"#93c5fd",dot:"#3b82f6"},"In Progress":{bg:"#e0f2fe",text:"#0c4a6e",border:"#7dd3fc",dot:"#0ea5e9"},"Release":{bg:"#fce7f3",text:"#9d174d",border:"#f9a8d4",dot:"#ec4899"},"Ready to Schedule":{bg:"#cffafe",text:"#155e75",border:"#67e8f9",dot:"#06b6d4"},"Staged":{bg:"#ede9fe",text:"#4c1d95",border:"#c4b5fd",dot:"#8b5cf6"},"Pre Staged":{bg:"#fef3c7",text:"#92400e",border:"#fcd34d",dot:"#f59e0b"}};
 var PRIMARY_STATUSES=["Live","Scheduled","In Progress"],SECONDARY_STATUSES=["Ready to Schedule","Staged","Pre Staged"],STATUS_ORDER=["Live","Scheduled","In Progress","Release","Ready to Schedule","Staged","Pre Staged"];
-var GROUP_COLORS={production:"#0891b2",nextup:"#f97316",remaining:"#64748b"},GROUP_TITLES={production:"Production",nextup:"Next Up",remaining:"Remaining"};
+var GROUP_COLORS={production:"#059669",nextup:"#f97316",remaining:"#64748b"},GROUP_TITLES={production:"Production",nextup:"Next Up",remaining:"Remaining"};
 var allItems=[],milestoneItems=[],activeTab="production",refreshTimer=null,msChart=null;
 var sortState={production:{col:"name",dir:1},nextup:{col:"name",dir:1},remaining:{col:"name",dir:1}};
 function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
@@ -112,10 +112,10 @@ function showError(msg){document.getElementById("error-area").innerHTML="<div cl
 function clearError(){document.getElementById("error-area").innerHTML="";}
 function setLoading(m){document.getElementById("loading-area").innerHTML="<div class='loading'><span class='spin'></span>"+esc(m)+"</div>";}
 function clearLoading(){document.getElementById("loading-area").innerHTML="";}
-function getToken(){return sessionStorage.getItem("asana_token_ps")||sessionStorage.getItem("asana_token_hub")||"";}
+function getToken(){return sessionStorage.getItem("asana_token_wk")||sessionStorage.getItem("asana_token_hub")||"";}
 window.onload=function(){
   var urlParam=new URLSearchParams(window.location.search).get("token");
-  if(urlParam)sessionStorage.setItem("asana_token_ps",urlParam);
+  if(urlParam)sessionStorage.setItem("asana_token_wk",urlParam);
   var s=getToken();
   if(s)loadData();
   else showError("No token found. Go back to <a href='index.html'>CentralView Hub</a>, enter your token, then return here.");
@@ -200,7 +200,7 @@ function renderGroup(g){
   }
   document.getElementById("pane-"+g).innerHTML="<div class='group-hdr' style='background:"+GROUP_COLORS[g]+"'><span class='gtitle'>"+GROUP_TITLES[g]+"<span class='gcnt'>"+items.length+"</span></span></div><div class='tbl-wrap'>"+(items.length===0?"<p class='empty'>No items match your filter.</p>":"<table><thead><tr>"+hdr+"</tr></thead><tbody>"+rows+"</tbody></table>")+"</div>";
 }
-function exportExcel(){if(!allItems.length){alert("Load the dashboard first.");return;}try{var wb=XLSX.utils.book_new();[{key:"production",label:"Production"},{key:"nextup",label:"Next Up"},{key:"remaining",label:"Remaining"}].forEach(function(sh){var rows=byGroup(sh.key).map(function(it){return{"Customer / Utility":it.name,"Status":it.status||"","Section":it.section,"Due Date":it.date||"","GitHub Issue":it.githubUrl||"","Completed":it.completed?"Yes":"No"};});var ws=XLSX.utils.json_to_sheet(rows);ws["!cols"]=[{wch:45},{wch:20},{wch:25},{wch:14},{wch:40},{wch:10}];XLSX.utils.book_append_sheet(wb,ws,sh.label);});XLSX.writeFile(wb,"PowerSearch-Installs-Tracker.xlsx");}catch(e){alert("Export failed: "+e.message);}}
+function exportExcel(){if(!allItems.length){alert("Load the dashboard first.");return;}try{var wb=XLSX.utils.book_new();[{key:"production",label:"Production"},{key:"nextup",label:"Next Up"},{key:"remaining",label:"Remaining"}].forEach(function(sh){var rows=byGroup(sh.key).map(function(it){return{"Customer / Utility":it.name,"Status":it.status||"","Section":it.section,"Due Date":it.date||"","GitHub Issue":it.githubUrl||"","Completed":it.completed?"Yes":"No"};});var ws=XLSX.utils.json_to_sheet(rows);ws["!cols"]=[{wch:45},{wch:20},{wch:25},{wch:14},{wch:40},{wch:10}];XLSX.utils.book_append_sheet(wb,ws,sh.label);});XLSX.writeFile(wb,"Works-Installs-Tracker.xlsx");}catch(e){alert("Export failed: "+e.message);}}
 </script>
 </body>
 </html>
