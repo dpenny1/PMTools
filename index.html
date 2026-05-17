@@ -281,9 +281,17 @@ async function unlockVault(){
     document.getElementById('vaultUnlockedPanel').style.display='block';
     document.getElementById('vaultLockBtn').style.display='inline-flex';
     document.getElementById('vaultIcon').textContent='🔓';
-    document.getElementById('vaultStatusText').textContent='Vault unlocked — select your Asana token below';
     renderVaultTokenList();
     renderActiveBar();
+    // Auto-select if exactly one Asana token is stored
+    var asanaTokens=Vault.list().filter(function(t){return t.type&&t.type.toLowerCase()==='asana';});
+    if(asanaTokens.length===1){
+      document.getElementById('vaultStatusText').textContent='Vault unlocked — loading Asana token...';
+      await assignAsana(asanaTokens[0].name);
+      document.getElementById('vaultStatusText').textContent='Vault unlocked — Asana token auto-loaded';
+    }else{
+      document.getElementById('vaultStatusText').textContent='Vault unlocked — select your Asana token below';
+    }
   }catch(e){
     document.getElementById('vaultPwErr').textContent=e.message;
   }
@@ -291,8 +299,7 @@ async function unlockVault(){
 
 function lockVaultWidget(){
   Vault.lock();
-  sessionStorage.removeItem('cv_session_asana');
-  sessionStorage.removeItem('cv_session_asana_name');
+  ['cv_session_asana','cv_session_asana_name','asana_token_hub','asana_token_cis','asana_token_ps','asana_token_wk','asana_token_fin','asana_token_sso','asana_token_cl'].forEach(function(k){sessionStorage.removeItem(k);});
   document.getElementById('vaultLockForm').style.display='block';
   document.getElementById('vaultUnlockedPanel').style.display='none';
   document.getElementById('vaultLockBtn').style.display='none';
@@ -342,8 +349,7 @@ async function assignAsana(name){
 }
 
 function unassignAsana(){
-  sessionStorage.removeItem('cv_session_asana');
-  sessionStorage.removeItem('cv_session_asana_name');
+  ['cv_session_asana','cv_session_asana_name','asana_token_hub','asana_token_cis','asana_token_ps','asana_token_wk','asana_token_fin','asana_token_sso','asana_token_cl'].forEach(function(k){sessionStorage.removeItem(k);});
   renderVaultTokenList();
   renderActiveBar();
 }
@@ -364,8 +370,10 @@ function manualLoad(){
   var tok=document.getElementById('token-input').value.trim();
   if(!tok){alert('Please paste your Asana token first.');return;}
   sessionStorage.setItem('cv_session_asana',tok);
+  sessionStorage.setItem('cv_session_asana_name','Manual Token');
   sessionStorage.setItem('asana_token_hub',tok);
   ['cis','ps','wk','fin','sso','cl'].forEach(function(k){sessionStorage.setItem('asana_token_'+k,tok);});
+  renderActiveBar();
   updateLaunchLinks(tok);
   loadAll(tok);
 }
@@ -391,6 +399,7 @@ function updateLaunchLinks(token){
 }
 
 function apiFetch(url,token){return fetch(url,{headers:{"Authorization":"Bearer "+token,"Accept":"application/json"}}).then(function(r){if(!r.ok)return r.text().then(function(txt){throw new Error(r.status+": "+txt);});return r.json();});}
+function fetchAllPagesHub(path,token){var base=ASANA_BASE+path,acc=[];function go(url){return apiFetch(url,token).then(function(json){acc=acc.concat(json.data||[]);if(json.next_page&&json.next_page.offset){var sep=base.indexOf("?")>=0?"&":"?";return go(base+sep+"offset="+encodeURIComponent(json.next_page.offset));}return acc;});}return go(base);}
 
 function loadAll(token){
   if(!token){alert("Please enter or select an Asana token first.");return;}
@@ -420,9 +429,8 @@ function loadInstallProject(p,token){
     function nextSec(idx){
       if(idx>=sections.length){updateInstallCard(p,counts,total,miniEl);return Promise.resolve();}
       var sec=sections[idx],inf=secInfo[sec.gid];
-      return apiFetch(ASANA_BASE+"/sections/"+sec.gid+"/tasks?opt_fields=gid,completed&limit=100",token)
-      .then(function(tj){
-        var tasks=tj.data||[];
+      return fetchAllPagesHub("/sections/"+sec.gid+"/tasks?opt_fields=gid,completed&limit=100",token)
+      .then(function(tasks){
         for(var j=0;j<tasks.length;j++){var t=tasks[j];if(inf.group==="milestones")continue;var keep=(inf.group==="production"||inf.group==="nextup");if(t.completed&&!keep)continue;total++;if(inf.status&&counts[inf.status]!==undefined)counts[inf.status]++;}
         return nextSec(idx+1);
       }).catch(function(){return nextSec(idx+1);});
@@ -447,9 +455,9 @@ function loadChecklists(token){
   document.getElementById("cl-overdue-list").innerHTML="<span class='loading-card'><span class='spin'></span>Loading...</span>";
   document.getElementById("cl-atrisk-list").innerHTML="";
   ["cl-complete","cl-ok","cl-warn","cl-over"].forEach(function(id){document.getElementById(id).textContent="-";});
-  apiFetch(ASANA_BASE+"/projects/"+CHECKLIST_GID+"/tasks?opt_fields=gid,name,completed,due_on&limit=100",token)
-  .then(function(json){
-    var tasks=(json.data||[]).filter(function(t){return !t.completed;});
+  fetchAllPagesHub("/projects/"+CHECKLIST_GID+"/tasks?opt_fields=gid,name,completed,due_on&limit=100",token)
+  .then(function(allTasks){
+    var tasks=allTasks.filter(function(t){return !t.completed;});
     if(!tasks.length){["cl-complete","cl-ok","cl-warn","cl-over"].forEach(function(id){document.getElementById(id).textContent="0";});document.getElementById("cl-overdue-list").innerHTML="<span style='font-size:.85rem;color:#9ca3af'>None</span>";document.getElementById("cl-atrisk-list").innerHTML="<span style='font-size:.85rem;color:#9ca3af'>None</span>";document.getElementById("sub-cl").textContent="0 installations";document.getElementById("ts-cl").textContent="Updated "+new Date().toLocaleTimeString();return;}
     var results=[],done=0;
     tasks.forEach(function(task){

@@ -116,7 +116,7 @@ var URGENCY_META={
 };
 function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function fmtDate(d){try{return new Date(d+"T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}catch(e){return d;}}
-function showError(msg){document.getElementById("error-area").innerHTML="<div class='error-box'>&#x274C; "+msg+"</div>";}
+function showError(msg){document.getElementById("error-area").innerHTML="<div class='error-box'>&#x274C; "+esc(msg)+"</div>";}
 function clearError(){document.getElementById("error-area").innerHTML="";}
 function setLoading(m){document.getElementById("loading-area").innerHTML="<div class='loading'><span class='spin'></span>"+esc(m)+"</div>";}
 function clearLoading(){document.getElementById("loading-area").innerHTML="";}

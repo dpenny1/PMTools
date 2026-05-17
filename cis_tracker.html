@@ -134,21 +134,22 @@ function deriveNextupStatus(notes){
   if(!notes)return{status:null,date:""};
   var n=notes.toLowerCase();
   var dateRe=/(\d{1,2}\/\d{1,2}\/\d{4})/;
+  var m;
   // Check Production first (before plain "release")
   var prodMatch=notes.match(/production\s+(\d{1,2}\/\d{1,2}\/\d{4})/i);
   if(prodMatch)return{status:"Release",date:prodMatch[1]};
   if(n.indexOf("production release")>=0||n.indexOf("prod release")>=0||n.indexOf("production")>=0){
-    var m=notes.match(dateRe);
+    m=notes.match(dateRe);
     return{status:"Release",date:m?m[1]:""};
   }
   var uatMatch=notes.match(/uat\s+(\d{1,2}\/\d{1,2}\/\d{4})/i);
   if(uatMatch)return{status:"UAT",date:uatMatch[1]};
   if(n.indexOf("uat")>=0){
-    var m=notes.match(dateRe);
+    m=notes.match(dateRe);
     return{status:"UAT",date:m?m[1]:""};
   }
   if(n.indexOf("release")>=0){
-    var m=notes.match(dateRe);
+    m=notes.match(dateRe);
     return{status:"Release",date:m?m[1]:""};
   }
   return{status:null,date:""};
