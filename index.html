@@ -69,7 +69,7 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
 .card-header h2{color:white;font-size:1.1rem;font-weight:700;margin-bottom:4px}
 .card-header p{color:rgba(255,255,255,0.8);font-size:0.82rem}
 .card-icon{position:absolute;top:18px;right:18px;font-size:1.8rem;opacity:0.7}
-.card-stats{padding:16px 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border-bottom:1px solid #f3f4f6}
+.card-stats{padding:16px 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;border-bottom:1px solid #f3f4f6}
 .card-body{padding:16px 20px 20px}
 .card-mini-stats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;min-height:28px}
 .mini-badge{font-size:0.78rem;font-weight:600;padding:3px 10px;border-radius:999px;border-width:1px;border-style:solid}
@@ -167,8 +167,10 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
         <div class="cs"><div class="n" style="color:#10b981" id="sso-live">-</div><div class="l">Live</div></div>
         <div class="cs"><div class="n" style="color:#3b82f6" id="sso-sched">-</div><div class="l">Scheduled</div></div>
         <div class="cs"><div class="n" style="color:#6b7280" id="sso-other">-</div><div class="l">Not Live/Sched</div></div>
+        <div class="cs"><div class="n" style="color:#1e1b4b" id="sso-total">-</div><div class="l">Total</div></div>
       </div>
       <div class="card-body">
+        <div id="sso-remaining-row" style="display:none;align-items:center;gap:8px;padding:6px 0 10px;border-bottom:1px solid #f3f4f6;margin-bottom:8px;font-size:0.82rem;color:#6b7280"><span style="width:8px;height:8px;border-radius:50%;background:#d1d5db;flex-shrink:0;display:inline-block"></span>Remaining (not yet in pipeline): <strong style="color:#374151" id="sso-remaining">-</strong></div>
         <div class="card-mini-stats" id="mini-sso"><span class="loading-card">Load token to view stats</span></div>
         <a class="launch-btn" id="sso-launch-btn" href="sso_tracker.html">Launch SSO Dashboard &#8594;</a>
         <div class="card-last-updated" id="ts-sso"></div>
@@ -183,8 +185,10 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
         <div class="cs"><div class="n" style="color:#10b981" id="cis-live">-</div><div class="l">Live</div></div>
         <div class="cs"><div class="n" style="color:#3b82f6" id="cis-sched">-</div><div class="l">Scheduled</div></div>
         <div class="cs"><div class="n" style="color:#6b7280" id="cis-other">-</div><div class="l">Not Live/Sched</div></div>
+        <div class="cs"><div class="n" style="color:#1e1b4b" id="cis-total">-</div><div class="l">Total</div></div>
       </div>
       <div class="card-body">
+        <div id="cis-remaining-row" style="display:none;align-items:center;gap:8px;padding:6px 0 10px;border-bottom:1px solid #f3f4f6;margin-bottom:8px;font-size:0.82rem;color:#6b7280"><span style="width:8px;height:8px;border-radius:50%;background:#d1d5db;flex-shrink:0;display:inline-block"></span>Remaining (not yet in pipeline): <strong style="color:#374151" id="cis-remaining">-</strong></div>
         <div class="card-mini-stats" id="mini-cis"><span class="loading-card">Load token to view stats</span></div>
         <a class="launch-btn" id="cis-launch-btn" href="cis_tracker.html">Launch CIS Dashboard &#8594;</a>
         <div class="card-last-updated" id="ts-cis"></div>
@@ -199,8 +203,10 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
         <div class="cs"><div class="n" style="color:#10b981" id="wk-live">-</div><div class="l">Live</div></div>
         <div class="cs"><div class="n" style="color:#3b82f6" id="wk-sched">-</div><div class="l">Scheduled</div></div>
         <div class="cs"><div class="n" style="color:#6b7280" id="wk-other">-</div><div class="l">Not Live/Sched</div></div>
+        <div class="cs"><div class="n" style="color:#1e1b4b" id="wk-total">-</div><div class="l">Total</div></div>
       </div>
       <div class="card-body">
+        <div id="wk-remaining-row" style="display:none;align-items:center;gap:8px;padding:6px 0 10px;border-bottom:1px solid #f3f4f6;margin-bottom:8px;font-size:0.82rem;color:#6b7280"><span style="width:8px;height:8px;border-radius:50%;background:#d1d5db;flex-shrink:0;display:inline-block"></span>Remaining (not yet in pipeline): <strong style="color:#374151" id="wk-remaining">-</strong></div>
         <div class="card-mini-stats" id="mini-wk"><span class="loading-card">Load token to view stats</span></div>
         <a class="launch-btn" id="wk-launch-btn" href="works_tracker.html">Launch Works Dashboard &#8594;</a>
         <div class="card-last-updated" id="ts-wk"></div>
@@ -215,8 +221,10 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
         <div class="cs"><div class="n" style="color:#10b981" id="ps-live">-</div><div class="l">Live</div></div>
         <div class="cs"><div class="n" style="color:#3b82f6" id="ps-sched">-</div><div class="l">Scheduled</div></div>
         <div class="cs"><div class="n" style="color:#6b7280" id="ps-other">-</div><div class="l">Not Live/Sched</div></div>
+        <div class="cs"><div class="n" style="color:#1e1b4b" id="ps-total">-</div><div class="l">Total</div></div>
       </div>
       <div class="card-body">
+        <div id="ps-remaining-row" style="display:none;align-items:center;gap:8px;padding:6px 0 10px;border-bottom:1px solid #f3f4f6;margin-bottom:8px;font-size:0.82rem;color:#6b7280"><span style="width:8px;height:8px;border-radius:50%;background:#d1d5db;flex-shrink:0;display:inline-block"></span>Remaining (not yet in pipeline): <strong style="color:#374151" id="ps-remaining">-</strong></div>
         <div class="card-mini-stats" id="mini-ps"><span class="loading-card">Load token to view stats</span></div>
         <a class="launch-btn" id="ps-launch-btn" href="ps_tracker.html">Launch Power Search Dashboard &#8594;</a>
         <div class="card-last-updated" id="ts-ps"></div>
@@ -234,8 +242,10 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f1
         <div class="cs"><div class="n" style="color:#10b981" id="fin-live">-</div><div class="l">Live</div></div>
         <div class="cs"><div class="n" style="color:#3b82f6" id="fin-sched">-</div><div class="l">Scheduled</div></div>
         <div class="cs"><div class="n" style="color:#6b7280" id="fin-other">-</div><div class="l">Not Live/Sched</div></div>
+        <div class="cs"><div class="n" style="color:#1e1b4b" id="fin-total">-</div><div class="l">Total</div></div>
       </div>
       <div class="card-body">
+        <div id="fin-remaining-row" style="display:none;align-items:center;gap:8px;padding:6px 0 10px;border-bottom:1px solid #f3f4f6;margin-bottom:8px;font-size:0.82rem;color:#6b7280"><span style="width:8px;height:8px;border-radius:50%;background:#d1d5db;flex-shrink:0;display:inline-block"></span>Remaining (not yet in pipeline): <strong style="color:#374151" id="fin-remaining">-</strong></div>
         <div class="card-mini-stats" id="mini-fin"><span class="loading-card">Load token to view stats</span></div>
         <a class="launch-btn" id="fin-launch-btn" href="fin_tracker.html">Launch FIN Dashboard &#8594;</a>
         <div class="card-last-updated" id="ts-fin"></div>
@@ -413,6 +423,9 @@ function loadInstallProject(p,token){
   document.getElementById(p.id+"-live").textContent="-";
   document.getElementById(p.id+"-sched").textContent="-";
   document.getElementById(p.id+"-other").textContent="-";
+  document.getElementById(p.id+"-total").textContent="-";
+  var remRow=document.getElementById(p.id+"-remaining-row");if(remRow)remRow.style.display="none";
+  var remEl=document.getElementById(p.id+"-remaining");if(remEl)remEl.textContent="-";
   document.getElementById(p.tsEl).textContent="";
   apiFetch(ASANA_BASE+"/projects/"+p.gid+"/sections?opt_fields=gid,name&limit=100",token)
   .then(function(json){
@@ -425,13 +438,13 @@ function loadInstallProject(p,token){
       else{var lo=sec.name.toLowerCase();if(lo.indexOf("live")>=0){grp="production";sta="Live";}else if(lo.indexOf("in prog")>=0){grp="production";sta="In Progress";}else if(lo.indexOf("sched")>=0){grp="production";sta="Scheduled";}else if(lo.indexOf("ready")>=0){grp="production";sta="Ready to Schedule";}else if(lo.indexOf("stage")>=0){grp="production";sta="Staged";}else if(lo.indexOf("uat")>=0||lo.indexOf("up next")>=0){grp="nextup";sta=null;}else if(lo.indexOf("milesto")>=0){grp="milestones";sta=null;}else{grp="remaining";sta=null;}}
       secInfo[sec.gid]={group:grp,status:sta};
     }
-    var counts={"Live":0,"Scheduled":0,"In Progress":0,"Ready to Schedule":0,"Staged":0,"Pre Staged":0},total=0;
+    var counts={"Live":0,"Scheduled":0,"In Progress":0,"Ready to Schedule":0,"Staged":0,"Pre Staged":0},total=0,remaining=0;
     function nextSec(idx){
-      if(idx>=sections.length){updateInstallCard(p,counts,total,miniEl);return Promise.resolve();}
+      if(idx>=sections.length){updateInstallCard(p,counts,total,remaining,miniEl);return Promise.resolve();}
       var sec=sections[idx],inf=secInfo[sec.gid];
       return fetchAllPagesHub("/sections/"+sec.gid+"/tasks?opt_fields=gid,completed&limit=100",token)
       .then(function(tasks){
-        for(var j=0;j<tasks.length;j++){var t=tasks[j];if(inf.group==="milestones")continue;var keep=(inf.group==="production"||inf.group==="nextup");if(t.completed&&!keep)continue;total++;if(inf.status&&counts[inf.status]!==undefined)counts[inf.status]++;}
+        for(var j=0;j<tasks.length;j++){var t=tasks[j];if(inf.group==="milestones")continue;var keep=(inf.group==="production"||inf.group==="nextup");if(t.completed&&!keep)continue;total++;if(inf.group==="remaining"&&!t.completed)remaining++;if(inf.status&&counts[inf.status]!==undefined)counts[inf.status]++;}
         return nextSec(idx+1);
       }).catch(function(){return nextSec(idx+1);});
     }
@@ -439,11 +452,14 @@ function loadInstallProject(p,token){
   }).catch(function(e){document.getElementById(p.miniEl).innerHTML="<span class='error-small'>&#x274C; "+e.message+"</span>";});
 }
 
-function updateInstallCard(p,counts,total,miniEl){
+function updateInstallCard(p,counts,total,remaining,miniEl){
   var live=counts["Live"]||0,sched=counts["Scheduled"]||0;
   document.getElementById(p.id+"-live").textContent=live;
   document.getElementById(p.id+"-sched").textContent=sched;
   document.getElementById(p.id+"-other").textContent=Math.max(0,total-live-sched);
+  document.getElementById(p.id+"-total").textContent=total;
+  var remEl=document.getElementById(p.id+"-remaining");
+  if(remEl){remEl.textContent=remaining;document.getElementById(p.id+"-remaining-row").style.display=remaining>0?"flex":"none";}
   document.getElementById(p.subEl).textContent=total+" total installs";
   document.getElementById(p.tsEl).textContent="Updated "+new Date().toLocaleTimeString();
   var show=["In Progress","Ready to Schedule","Staged","Pre Staged"],badges="";
