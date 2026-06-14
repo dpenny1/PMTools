@@ -459,7 +459,7 @@ function updateInstallCard(p,counts,total,remaining,miniEl){
   document.getElementById(p.id+"-other").textContent=Math.max(0,total-live-sched);
   document.getElementById(p.id+"-total").textContent=total;
   var remEl=document.getElementById(p.id+"-remaining");
-  if(remEl){remEl.textContent=remaining;document.getElementById(p.id+"-remaining-row").style.display=remaining>0?"flex":"none";}
+  if(remEl){remEl.textContent=remaining;document.getElementById(p.id+"-remaining-row").style.display="flex";}
   document.getElementById(p.subEl).textContent=total+" total installs";
   document.getElementById(p.tsEl).textContent="Updated "+new Date().toLocaleTimeString();
   var show=["In Progress","Ready to Schedule","Staged","Pre Staged"],badges="";
